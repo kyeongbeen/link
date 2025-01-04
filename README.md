@@ -25,15 +25,17 @@ npm install
 ```
 
 ### 3. **디렉토리 구조**
-└─src
-    └─components
-        ├─Auth
-            ├─AuthProvider.js
-            ├─Login.js
-            ├─Register.js
-        └─Dashboard
-            └─Dashboard.js
-    └─...
+```
+    └─src
+        └─components
+            ├─Auth
+                ├─AuthProvider.js
+                ├─Login.js
+                ├─Register.js
+            └─Dashboard
+                └─Dashboard.js
+        └─...
+```
 
 ### 4. **구현 현황**
 1. **회원가입, 로그인 페이지**
