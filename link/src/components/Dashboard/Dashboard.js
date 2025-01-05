@@ -9,16 +9,23 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import { styled } from '@mui/material/styles';
 import LinkIcon from '@mui/icons-material/Link';
+import ImportContactsIcon from '@mui/icons-material/ImportContacts';
 import { createTheme } from '@mui/material/styles';
 import { AppProvider } from '@toolpad/core/AppProvider';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
-import ImportContactsIcon from '@mui/icons-material/ImportContacts';
-import { Account, AccountPreview, AccountPopoverFooter, SignOutButton } from '@toolpad/core/Account';
-import Login from '../Auth/Login'; 
-import Register from '../Auth/Register'; 
+import {
+  Account,
+  AccountPreview,
+  AccountPopoverFooter,
+  SignOutButton,
+} from '@toolpad/core/Account';
+import Login from '../Auth/Login';
+import Register from '../Auth/Register';
 import { useNavigate } from 'react-router-dom';
-
 
 // 내비게이션 메뉴 설정
 const NAVIGATION = [
@@ -36,13 +43,23 @@ const demoTheme = createTheme({
   },
 });
 
-// 페이지 콘텐츠 컴포넌트
+// 페이지 콘텐츠 컴포넌트 (컨텐츠 내용물)
 function DemoPageContent({ pathname }) {
   return (
-    <Box sx={{ py: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-      <Typography>현재 페이지 주소 {pathname}</Typography>
-      { pathname === '/board' && <Login /> }
-      { pathname === '/calculator' && <Register /> }
+    <Box
+      sx={{
+        py: 4,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+      }}
+    >
+      <Typography>현재 페이지 주소 {pathname}</Typography> {/* 현재 페이지 주소 출력(임시)*/}
+      {/* 페이지 주소에 따라 컴포넌트 렌더링 */}
+      {/* pathname만 넣어주면 컨텐츠에 반영 되는 코드 */}
+      {/* {pathname === '/login' && <Login />}
+      {pathname === '/register' && <Register />} */}
     </Box>
   );
 }
@@ -55,7 +72,11 @@ function AccountSidebarPreview(props) {
   return (
     <Stack direction="column" p={0} overflow="hidden">
       <Divider />
-      <AccountPreview variant={mini ? 'condensed' : 'expanded'} handleClick={handleClick} open={open} />
+      <AccountPreview
+        variant={mini ? 'condensed' : 'expanded'}
+        handleClick={handleClick}
+        open={open}
+      />
     </Stack>
   );
 }
@@ -68,29 +89,64 @@ AccountSidebarPreview.propTypes = {
 
 // 계정 목록 데이터
 const accounts = [
-  { id: 1, name: 'Bharat Kashyap', email: 'bharatkashyap@outlook.com', image: 'https://avatars.githubusercontent.com/u/19550456', projects: [{ id: 3, title: 'Project X' }] },
-  { id: 2, name: 'Bharat MUI', email: 'bharat@mui.com', color: '#8B4513', projects: [{ id: 4, title: 'Project A' }] },
+  {
+    id: 1,
+    name: '연결고리',
+    email: 'link@gmail.com',
+    image: 'https://avatars.githubusercontent.com/u/19550456',
+    projects: [{ id: 3, title: 'Project X' }],
+  },
+  {
+    id: 2,
+    name: 'Bharat MUI',
+    email: 'bharat@mui.com',
+    color: '#8B4513',
+    projects: [{ id: 4, title: 'Project A' }],
+  },
 ];
 
 // 사이드바 계정 팝오버 내용
 function SidebarFooterAccountPopover() {
   return (
     <Stack direction="column">
-      <Typography variant="body2" mx={2} mt={1}>Accounts</Typography>
+      <Typography variant="body2" mx={2} mt={1}>
+        Accounts
+      </Typography>
       <MenuList>
         {accounts.map((account) => (
-          <MenuItem key={account.id} component="button" sx={{ justifyContent: 'flex-start', width: '100%', columnGap: 2 }}>
+          <MenuItem
+            key={account.id}
+            component="button"
+            sx={{ justifyContent: 'flex-start', width: '100%', columnGap: 2 }}
+          >
             <ListItemIcon>
-              <Avatar sx={{ width: 32, height: 32, fontSize: '0.95rem', bgcolor: account.color }} src={account.image ?? ''} alt={account.name ?? ''}>
+              <Avatar
+                sx={{ width: 32, height: 32, fontSize: '0.95rem', bgcolor: account.color }}
+                src={account.image ?? ''}
+                alt={account.name ?? ''}
+              >
                 {account.name[0]}
               </Avatar>
             </ListItemIcon>
-            <ListItemText sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }} primary={account.name} secondary={account.email} primaryTypographyProps={{ variant: 'body2' }} secondaryTypographyProps={{ variant: 'caption' }} />
+            <ListItemText
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                width: '100%',
+              }}
+              primary={account.name}
+              secondary={account.email}
+              primaryTypographyProps={{ variant: 'body2' }}
+              secondaryTypographyProps={{ variant: 'caption' }}
+            />
           </MenuItem>
         ))}
       </MenuList>
       <Divider />
-      <AccountPopoverFooter><SignOutButton /></AccountPopoverFooter>
+      <AccountPopoverFooter>
+        <SignOutButton />
+      </AccountPopoverFooter>
     </Stack>
   );
 }
@@ -108,14 +164,14 @@ function SidebarFooterAccount({ mini }) {
   const PreviewComponent = React.useMemo(() => createPreviewComponent(mini), [mini]);
   return (
     <Account
-      slots={{ preview: PreviewComponent, popoverContent: SidebarFooterAccountPopover }}
+      slots={{ preview: PreviewComponent, 
+        popoverContent: SidebarFooterAccountPopover }}
       slotProps={{
         popover: {
           transformOrigin: { horizontal: 'left', vertical: 'bottom' },
           anchorOrigin: { horizontal: 'right', vertical: 'bottom' },
           disableAutoFocus: true,
-          slotProps: { paper: { elevation: 0, sx: { overflow: 'visible', filter: (theme) => `drop-shadow(0px 2px 8px ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.32)'})`, mt: 1, '&::before': { content: '""', display: 'block', position: 'absolute', bottom: 10, left: 0, width: 10, height: 10, bgcolor: 'background.paper', transform: 'translate(-50%, -50%) rotate(45deg)', zIndex: 0 } } } }
-        }
+        },
       }}
     />
   );
@@ -123,14 +179,81 @@ function SidebarFooterAccount({ mini }) {
 
 SidebarFooterAccount.propTypes = { mini: PropTypes.bool.isRequired };
 
-// 세션 데이터 설정 (예시)
-const demoSession = { user: { name: 'Bharat Kashyap', email: 'bharatkashyap@outlook.com', image: 'https://avatars.githubusercontent.com/u/19550456' } };
+// 세션 데이터 설정 (임시)
+const demoSession = {
+  user: {
+    name: '연결고리',
+    email: 'link@gmail.com',
+    image: 'https://avatars.githubusercontent.com/u/19550456',
+  },
+};
 
-// 대시보드 레이아웃 컴포넌트
+// 탭 스타일링 및 컴포넌트
+const AntTabs = styled(Tabs)({
+  borderBottom: '1px solid #e8e8e8',
+  '& .MuiTabs-indicator': {
+    backgroundColor: '#1890ff',
+  },
+});
+
+const AntTab = styled((props) => <Tab disableRipple {...props} />)(({ theme }) => ({
+  textTransform: 'none',
+  minWidth: 0,
+  fontWeight: theme.typography.fontWeightRegular,
+  marginRight: theme.spacing(1),
+  '&:hover': {
+    color: '#40a9ff',
+    opacity: 1,
+  },
+  '&.Mui-selected': {
+    color: '#1890ff',
+  },
+}));
+
+// 탭 UI 컴포넌트
+function CustomizedTabs({ setPathname }) {
+  const [value, setValue] = React.useState(0); 
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue); // 탭 변경 시 상태 업데이트
+
+    // 각 탭에 맞는 경로 설정
+    switch (newValue) {
+      case 0:
+        setPathname('/dashboard');
+        break;
+      case 1:
+        setPathname('/work');
+        break;
+      case 2:
+        setPathname('/timeline');
+        break;
+      case 3:
+        setPathname('/board');
+        break;
+      default:
+        setPathname('/dashboard');
+    }
+  };
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <AntTabs value={value} onChange={handleChange} aria-label="custom tabs">
+        <AntTab label="대시보드" />
+        <AntTab label="작업" />
+        <AntTab label="타임라인" />
+        <AntTab label="게시판" />
+      </AntTabs>
+    </Box>
+  );
+}
+
+// 대시보드 레이아웃 컴포넌트 (전체 레이아웃)
 function DashboardLayoutAccountSidebar(props) {
   const navigate = useNavigate();
   const { window } = props;
-  const [pathname, setPathname] = React.useState('/Dashboard');
+  const [pathname, setPathname] = React.useState('/dashboard'); // 초기 경로 설정
+
   const router = React.useMemo(() => {
     return { pathname, searchParams: new URLSearchParams(), navigate: (path) => setPathname(String(path)) };
   }, [pathname]);
@@ -140,7 +263,7 @@ function DashboardLayoutAccountSidebar(props) {
   const [session, setSession] = React.useState(demoSession);
   const authentication = React.useMemo(() => ({
     signIn: () => { setSession(demoSession); },
-    signOut: () => { navigate('/'); },
+    signOut: () => { navigate('/'); }, // 로그아웃 시 홈으로 이동
   }), []);
 
   return (
@@ -153,8 +276,15 @@ function DashboardLayoutAccountSidebar(props) {
       session={session}
     >
       <DashboardLayout
-        slots={{ toolbarAccount: () => null, sidebarFooter: SidebarFooterAccount }}
+        slots={{
+          sidebarFooter: SidebarFooterAccount,
+        }}
       >
+        <Box sx> 
+          {/* Tab 컴포넌트 pathname */}
+          <CustomizedTabs setPathname={setPathname} />
+        </Box>
+        {/* (임시) 페이지 콘텐츠 컴포넌트에 pathname 전달 */}
         <DemoPageContent pathname={pathname} />
       </DashboardLayout>
     </AppProvider>

@@ -116,9 +116,9 @@ const Register = () => {
                     mt: 3,
                     mb: 2,
                     fontWeight: 'bold',
-                    color: 'black',
-                    backgroundColor: 'orange',
-                    '&:hover': { backgroundColor: 'darkorange' },
+                    
+                    backgroundColor: 'lightgray',
+                    '&:hover': { backgroundColor: 'gray' },
                   }}
                   size="large"
                 >
@@ -131,8 +131,9 @@ const Register = () => {
                     mt: 0,
                     mb: 2,
                     fontWeight: 'bold',
-                    backgroundColor: 'lightgray',
-                    '&:hover': { backgroundColor: 'gray' },
+                    color: 'black',
+                    backgroundColor: 'orange',
+                    '&:hover': { backgroundColor: 'darkorange' },
                   }}
                   size="large"
                   onClick={handleLogin}
