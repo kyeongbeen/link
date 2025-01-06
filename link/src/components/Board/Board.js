@@ -13,17 +13,20 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import { DialogContentText } from '@mui/material';
 
 const Board = () => {
-    // 게시글 목록 페이지네이션 수정 삭제
-    const postPerPage = 5;
-    const [currentPage, setCurrentPage] = useState(1);
-    const [selectedPost, setSelectedPost] = useState(null);
-    const [openDialog, setOpenDialog] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editedPost, setEditedPost] = useState(null);
+    const postPerPage = 5; // 페이지당 게시글 수
+    const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
+    const [selectedPost, setSelectedPost] = useState(null); // 선택된 게시글
+    const [openDialog, setOpenDialog] = useState(false); // 다이얼로그 열림 여부
+    const [isEditing, setIsEditing] = useState(false);  // 수정 중인지 여부
+    const [editedPost, setEditedPost] = useState(null); // 수정 중인 게시글
+    const [newReply, setNewReply] = useState(""); // 새로운 댓글 내용
+    const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
+    const [newPost, setNewPost] = useState({ title: '', content: '' }); // 새로운 게시글 내용
 
-    // 한국시간으로 변환하는 함수
+    // 날짜 형식 변환 함수
     const formatDateToKrTime = (date) => {
         const options = {
             year: 'numeric',
@@ -36,28 +39,23 @@ const Board = () => {
         return new Date(date).toLocaleString('ko-KR', options).replace(',', '');
     };
 
-    // 게시글 목록 데이터 (더미 데이터)
-    // TODO: 추후 백엔드 API에서 게시글 목록 로드
+    // 게시글 목록 데이터
     const [posts, setPosts] = useState(
         Array.from({ length: 25 }, (_, index) => ({
             id: index + 1,
             title: `게시글 제목 ${index + 1}`,
             author: `작성자 ${index + 1}`,
             content: `게시글 내용 ${index + 1}의 내용입니다.`,
-            date: formatDateToKrTime(new Date()), // 한국시간으로 변환해서 삽입
+            date: formatDateToKrTime(new Date()),
+            replys: [], // 댓글 배열 추가
         }))
     );
 
-    // 전체 페이지 수
+    // 전체 페이지 수 계산
     const totalPage = Math.ceil(posts.length / postPerPage);
+    const currentPosts = posts.slice((currentPage - 1) * postPerPage, currentPage * postPerPage);
 
-    // 현재 페이지에 따른 게시글 목록
-    const currentPosts = posts.slice(
-        (currentPage - 1) * postPerPage,
-        currentPage * postPerPage
-    );
-
-    // 페이지 변경 시
+    // 페이지 변경
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
@@ -76,16 +74,14 @@ const Board = () => {
     };
 
     // 게시글 수정
-    // TODO: 추후 백엔드 API에서 게시글 수정
     const handleEdit = () => {
         setIsEditing(true); // 수정 모드로 변경
     };
 
     const handleSaveEdit = () => {
-        setPosts((prevPosts) =>  
-            // Post에서 수정할 게시물만 찾아서 수정 post.id(게시물.id) === editedPost.id(수정할 게시물.id)
-            prevPosts.map((post) => 
-                post.id === editedPost.id ? { ...post, ...editedPost } : post 
+        setPosts((prevPosts) =>
+            prevPosts.map((post) =>
+                post.id === editedPost.id ? { ...post, ...editedPost } : post
             )
         );
         setIsEditing(false); // 수정 모드 해제
@@ -93,20 +89,71 @@ const Board = () => {
     };
 
     // 게시글 삭제
-    // TODO: 추후 백엔드 API에서 게시글 삭제
     const handleDelete = () => {
-        setPosts((prevPosts) => prevPosts.filter((post) => post.id !== selectedPost.id)); 
+        setPosts((prevPosts) => prevPosts.filter((post) => post.id !== selectedPost.id));
         handleCloseDialog();
+    };
+
+    // 댓글 추가
+    const handleAddReply = () => {
+        if (newReply.trim()) {
+            setPosts((prevPosts) => {
+                const updatedPosts = prevPosts.map((post) =>
+                    post.id === selectedPost.id
+                        ? {
+                              ...post,
+                              replys: [
+                                  ...post.replys,
+                                  {
+                                      author: "댓글 작성자",
+                                      content: newReply,
+                                      date: formatDateToKrTime(new Date()),
+                                  },
+                              ],
+                          }
+                        : post
+                );
+                const updatedPost = updatedPosts.find((post) => post.id === selectedPost.id);
+                setSelectedPost(updatedPost);
+                return updatedPosts;
+            });
+            setNewReply(""); // 댓글 입력 필드 초기화
+        }
+    };
+
+    // 새로운 게시글 추가
+    const handleCreatePost = () => {
+        if (newPost.title.trim() && newPost.content.trim()) {
+            const newPostData = {
+                id: posts.length + 1,
+                ...newPost,
+                author: `작성자 ${posts.length + 1}`, // 작성자는 임시로 게시글 id로 설정
+                date: formatDateToKrTime(new Date()),
+                replys: [],
+            };
+            setPosts((prevPosts) => [newPostData, ...prevPosts]);
+            setOpenCreateDialog(false); // 다이얼로그 닫기
+            setNewPost({ title: '', content: '' }); // 입력 필드 초기화
+        }
     };
 
     return (
         <div style={{ padding: '20px' }}>
-            {/* 게시글 목록 테이블 */}
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setOpenCreateDialog(true)} // 글 작성 다이얼로그 열기
+                style={{ marginBottom: '20px' }}
+            >
+                글 작성하기
+            </Button>
+
             <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="게시글 목록">
+                <Table sx={{ minWidth: 850 }} aria-label="게시글 목록">
                     <TableHead>
                         <TableRow>
                             <TableCell>제목</TableCell>
+                            <TableCell align="center">작성자</TableCell>
                             <TableCell align="right">작성일자</TableCell>
                         </TableRow>
                     </TableHead>
@@ -118,6 +165,7 @@ const Board = () => {
                                 style={{ cursor: 'pointer' }}
                             >
                                 <TableCell>{post.title}</TableCell>
+                                <TableCell align="center">{post.author}</TableCell>
                                 <TableCell align="right">{post.date}</TableCell>
                             </TableRow>
                         ))}
@@ -125,54 +173,100 @@ const Board = () => {
                 </Table>
             </TableContainer>
 
-            {/* 페이지네이션 */}
-            <PaginationComponent
-                totalPages={totalPage}
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-            />
+            <PaginationComponent totalPages={totalPage} currentPage={currentPage} onPageChange={handlePageChange} />
 
-            {/* 다이얼로그 팝업 */}
+            {/* 게시글 상세 다이얼로그 */}
             <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-                <DialogTitle>
-                    {isEditing ? (
-                        <TextField
-                            fullWidth
-                            value={editedPost?.title}
-                            onChange={(e) =>
-                                setEditedPost({ ...editedPost, title: e.target.value })
-                            }
-                        />
-                    ) : (
-                        selectedPost?.title
-                    )}
-                </DialogTitle>
+            <DialogTitle>
                 {isEditing ? (
                     <TextField
                         fullWidth
-                        multiline
-                        rows={4}
-                        value={editedPost?.content}
-                        onChange={(e) =>
-                            setEditedPost({ ...editedPost, content: e.target.value })
-                        }
+                        value={editedPost?.title}
+                        onChange={(e) => setEditedPost({ ...editedPost, title: e.target.value })}
                     />
                 ) : (
-                    <PostDetail post={selectedPost} />
+                    selectedPost?.title
                 )}
-                <DialogActions>
-                    {isEditing ? (
-                        <Button onClick={handleSaveEdit}>저장</Button>
-                    ) : (
-                        <>
-                            <Button onClick={handleEdit}>수정</Button>
-                            <Button onClick={handleDelete} color="error">삭제</Button>
-                        </>
-                    )}
-                    <Button onClick={handleCloseDialog}>닫기</Button>
-                </DialogActions>
-            </Dialog>
-        </div>
+            </DialogTitle>
+            {isEditing ? (
+                <TextField
+                    fullWidth
+                    multiline
+                    rows={10}
+                    value={editedPost?.content}
+                    onChange={(e) => setEditedPost({ ...editedPost, content: e.target.value })}
+                />
+            ) : (
+                <PostDetail post={selectedPost} />
+            )}
+            <DialogActions>
+                {isEditing ? (
+                    <Button onClick={handleSaveEdit}>저장</Button>
+                ) : (
+                    <>
+                        <Button onClick={handleEdit}>수정</Button>
+                        <Button onClick={handleDelete} color="error">삭제</Button>
+                    </>
+                )}
+                <Button onClick={handleCloseDialog}>닫기</Button>
+            </DialogActions>
+
+            {/* 댓글 영역 */}
+            {!isEditing && selectedPost?.replys?.map((reply, index) => (
+                <div key={index} style={{ borderBottom: '1px solid #ddd', paddingBottom: '10px', marginBottom: '10px' }}>
+                    <p><strong>{reply.author}</strong> ({reply.date})</p>
+                    <p>{reply.content}</p>
+                </div>
+            ))}
+
+            {/* 댓글 입력 필드 */}
+            {!isEditing && (
+                <div style={{ padding: '10px' }}>
+                    <TextField
+                        fullWidth
+                        label="댓글을 입력하세요."
+                        value={newReply}
+                        onChange={(e) => setNewReply(e.target.value)}
+                        multiline
+                        rows={1}
+                    />
+                    <Button onClick={handleAddReply} style={{ marginTop: '10px' }} variant="contained" color="primary">
+                        댓글 추가
+                    </Button>
+                </div>
+            )}
+        </Dialog>
+
+        {/* 글 작성 다이얼로그 */}
+        <Dialog open={openCreateDialog} onClose={() => setOpenCreateDialog(false)} fullWidth maxWidth="sm">
+            <DialogTitle>게시글 작성</DialogTitle>
+            <DialogContentText>
+                <TextField
+                    label="제목"
+                    fullWidth
+                    value={newPost.title}
+                    onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+                    style={{ marginBottom: '20px' }}
+                />
+                <TextField
+                    label="내용"
+                    fullWidth
+                    multiline
+                    rows={10}
+                    value={newPost.content}
+                    onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
+                />
+            </DialogContentText>
+            <DialogActions>
+                <Button onClick={() => setOpenCreateDialog(false)} color="secondary">
+                    닫기
+                </Button>
+                <Button onClick={handleCreatePost} color="primary">
+                    등록하기
+                </Button>
+            </DialogActions>
+        </Dialog>
+    </div>
     );
 };
 
