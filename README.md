@@ -33,6 +33,10 @@ npm install
                 ├─Register.js
             └─Dashboard
                 └─Dashboard.js
+            └─Board
+                └─Board.js
+                └─Pagination.js
+                └─PostDetail.js
         └─...
 ```
 
@@ -54,3 +58,9 @@ npm install
 4. **Tabs 추가**
    - 대쉬보드, 작업, 타임라인, 게시판 tab 추가 
    - 각 아이템의 pathname 설정 후, DemoPageContent에 임시로 출력 
+
+5. **게시판, 게시판 상세정보 추가**
+   - 게시판에 보여지는 게시글은 간단한 UI 적용 완료
+   - 페이지네이션 구현
+   - 게시글 상세정보 팝업으로 구현 (오후에 UI 입힐 예정)
+   

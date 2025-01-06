@@ -26,6 +26,8 @@ import {
 import Login from '../Auth/Login';
 import Register from '../Auth/Register';
 import { useNavigate } from 'react-router-dom';
+import Board from '../Board/Board';
+import PostDetail from '../Board/PostDetail';
 
 // 내비게이션 메뉴 설정
 const NAVIGATION = [
@@ -59,7 +61,9 @@ function DemoPageContent({ pathname }) {
       {/* 페이지 주소에 따라 컴포넌트 렌더링 */}
       {/* pathname만 넣어주면 컨텐츠에 반영 되는 코드 */}
       {/* {pathname === '/login' && <Login />}
-      {pathname === '/register' && <Register />} */}
+      {/* {pathname === '/register' && <Register />} */}
+      {pathname === '/board' && <Board />}
+      {pathname === '/post/:id' && <PostDetail />}
     </Box>
   );
 }
