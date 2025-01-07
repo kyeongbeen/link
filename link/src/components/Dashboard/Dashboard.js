@@ -61,8 +61,8 @@ function DemoPageContent({ pathname }) {
     <Box
       sx={{
         width: "100%", // 부모 Box의 너비를 100%로 설정
-        px: 2, // 좌우 여백 추가
-        pt: 2, // 위쪽 여백 추가 (좌우 여백과 동일하게 설정)
+        px: 3, // 좌우 여백 추가
+        pt: 3, // 위쪽 여백 추가 (좌우 여백과 동일하게 설정)
       }}
     >
       <Grid2
