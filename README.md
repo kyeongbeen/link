@@ -12,6 +12,13 @@
 
 프로젝트 의존성 파일을 기반으로 필요한 라이브러리들을 설치할 수 있습니다. 아래의 명령어로 의존성들을 설치하세요:
 
+DatePicker 사용을 위해 install 해야 합니다.
+```
+  npm install @mui/x-date-pickers
+  npm install dayjs
+```
+Dependencies에 추가는 되어 있으나 혹시 모르니 npm install 한번씩 부탁드려요.
+
 ```bash
 npm install
 ```
@@ -37,6 +44,10 @@ npm install
                 └─Board.js
                 └─Pagination.js
                 └─PostDetail.js
+            └─Task
+               └─TaskBoard.js
+               └─TaskDetail.js
+               └─TaskPagenation.js
         └─...
 ```
 
@@ -66,11 +77,18 @@ npm install
    - API 관련 로직은 아직 구현 x
    - MUI(Material-UI)를 사용
 
-6. **작업 페이지 진행 및 기타 수정**
-   - 게시판 코드를 가져 와 작업 페이지에 맞게 수정
-   - 현재 작업 목록만 볼 수 있음
-   - 추가, 삭제는 오후에 구현 예정
-   - 사이드바 메뉴 Link를 누르면 tab이 보이도록 수정, project를 누르면 tab 비활성화
+6. **작업 페이지 구현**
+   - 게시판 상세보기, 페이지네이션, 작업 추가 및 삭제
+   - 더미 데이터로 테스트까지만 진행
+   - API 관련 로직은 아직 구현x
+   - MUI(Material-UI)를 사용
+   - 상세보기 UI 입힐 예정 
+
+7. **게시판 수정시 댓글이 지워짐 문제**
+   - 수정 예정 
+
+
+
 
 
    

@@ -15,6 +15,9 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { DialogContent, DialogContentText } from "@mui/material";
 
+/**
+ * 추후 API 연동할 때 useState에 author 추가
+ */
 const Board = () => {
   const postPerPage = 5; // 페이지당 게시글 수
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
@@ -24,7 +27,7 @@ const Board = () => {
   const [editedPost, setEditedPost] = useState(null); // 수정 중인 게시글
   const [newReply, setNewReply] = useState(""); // 새로운 댓글 내용
   const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
-  const [newPost, setNewPost] = useState({ title: "", content: "" }); // 새로운 게시글 내용
+  const [newPost, setNewPost] = useState({ title: "", content: ""}); // 새로운 게시글 내용
 
   // 날짜 형식 변환 함수
   const formatDateToKrTime = (date) => {
@@ -176,14 +179,14 @@ const Board = () => {
       >
         글 작성하기
       </Button>
-
+      {/* 게시판 목록 테이블 */}
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 850 }} aria-label="게시글 목록">
           <TableHead>
             <TableRow>
-              <TableCell>제목</TableCell>
+              <TableCell align="center">제목</TableCell>
               <TableCell align="center">작성자</TableCell>
-              <TableCell align="right">작성일자</TableCell>
+              <TableCell align="center">작성일자</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -193,9 +196,9 @@ const Board = () => {
                 onClick={() => handlePostClick(post)}
                 style={{ cursor: "pointer" }}
               >
-                <TableCell>{post.title}</TableCell>
+                <TableCell align="center">{post.title}</TableCell>
                 <TableCell align="center">{post.author}</TableCell>
-                <TableCell align="right">{post.date}</TableCell>
+                <TableCell align="center">{post.date}</TableCell>
               </TableRow>
             ))}
           </TableBody>
