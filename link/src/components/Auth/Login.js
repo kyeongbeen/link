@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   CssBaseline,
@@ -9,8 +9,8 @@ import {
   Box,
   Typography,
   Container,
-} from '@mui/material/';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+} from "@mui/material/";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const Login = () => {
   const theme = createTheme();
@@ -24,22 +24,22 @@ const Login = () => {
   // 로그인 성공 시 대시보드 페이지로 이동 (로그인 로직 미구현)
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
   // 회원가입 페이지 이동
   const handleRegister = () => {
-    navigate('/register');
+    navigate("/register");
   };
 
   return (
     <ThemeProvider theme={theme}>
       <Box
         sx={{
-          bgcolor: 'gray', // 전체 배경을 회색으로 
-          minHeight: '100vh', // 화면 전체 높이
-          display: 'flex', // 컨테이너를 가운데 정렬
-          justifyContent: 'center',
-          alignItems: 'center',
+          bgcolor: "gray", // 전체 배경을 회색으로
+          minHeight: "100vh", // 화면 전체 높이
+          display: "flex", // 컨테이너를 가운데 정렬
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
         <Container component="main" maxWidth="xs">
@@ -47,21 +47,31 @@ const Login = () => {
           <Box
             sx={{
               marginTop: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              width: '100%',
-              height: '600px', 
-              bgcolor: 'white', // 컨테이너 배경 흰색
-              borderRadius: '8px', 
-              boxShadow: 20, 
-              padding: '15px', 
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+              height: "600px",
+              bgcolor: "white", // 컨테이너 배경 흰색
+              borderRadius: "8px",
+              boxShadow: 20,
+              padding: "15px",
             }}
           >
-            <Typography component="h1" variant="h5" marginTop="60px" fontWeight={700}>
+            <Typography
+              component="h1"
+              variant="h5"
+              marginTop="60px"
+              fontWeight={700}
+            >
               로그인
             </Typography>
-            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 5 }}>
+            <Box
+              component="form"
+              noValidate
+              onSubmit={handleSubmit}
+              sx={{ mt: 5 }}
+            >
               <FormControl component="fieldset" variant="standard">
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
@@ -93,10 +103,10 @@ const Login = () => {
                   sx={{
                     mt: 3,
                     mb: 2,
-                    fontWeight: 'bold',
-                    color: 'black',
-                    backgroundColor: 'orange',
-                    '&:hover': { backgroundColor: 'darkorange' }, // 커서 올라 갈 때 좀 더 어두운 주황색
+                    fontWeight: "bold",
+                    color: "black",
+                    backgroundColor: "orange",
+                    "&:hover": { backgroundColor: "darkorange" }, // 커서 올라 갈 때 좀 더 어두운 주황색
                   }}
                   size="large"
                 >
@@ -109,9 +119,9 @@ const Login = () => {
                   sx={{
                     mt: 0,
                     mb: 2,
-                    fontWeight: 'bold',
-                    backgroundColor: 'lightgray',
-                    '&:hover': { backgroundColor: 'gray' }, // 커서 올라 갈 때 좀 더 어두운 회색
+                    fontWeight: "bold",
+                    backgroundColor: "lightgray",
+                    "&:hover": { backgroundColor: "gray" }, // 커서 올라 갈 때 좀 더 어두운 회색
                   }}
                   size="large"
                 >
