@@ -23,11 +23,12 @@ import {
   AccountPopoverFooter,
   SignOutButton,
 } from "@toolpad/core/Account";
+import { useNavigate } from "react-router-dom";
+// 컴포넌트 가져오기
 import Login from "../Auth/Login";
 import Register from "../Auth/Register";
-import { useNavigate } from "react-router-dom";
 import Board from "../Board/Board";
-import PostDetail from "../Board/PostDetail";
+import TaskBoard from "../Task/TaskBoard";
 
 // 내비게이션 메뉴 설정
 const NAVIGATION = [
@@ -64,7 +65,7 @@ function DemoPageContent({ pathname }) {
       {/* {pathname === '/login' && <Login />}
       {/* {pathname === '/register' && <Register />} */}
       {pathname === "/board" && <Board />}
-      {pathname === "/post/:id" && <PostDetail />}
+      {pathname === "/taskboard" && <TaskBoard />}
     </Box>
   );
 }
@@ -228,7 +229,7 @@ const AntTab = styled((props) => <Tab disableRipple {...props} />)(
 );
 
 // 탭 UI 컴포넌트
-function CustomizedTabs({ setPathname }) {
+function CustomizedTabs({ setPathname, pathname }) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -240,7 +241,7 @@ function CustomizedTabs({ setPathname }) {
         setPathname("/dashboard");
         break;
       case 1:
-        setPathname("/work");
+        setPathname("/taskboard");
         break;
       case 2:
         setPathname("/timeline");
@@ -252,6 +253,11 @@ function CustomizedTabs({ setPathname }) {
         setPathname("/dashboard");
     }
   };
+
+  // segment가 "project"일 때 탭 UI 숨기기
+  if (pathname.includes("project")) {
+    return null;
+  }
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -288,8 +294,8 @@ function DashboardLayoutAccountSidebar(props) {
         setSession(demoSession);
       },
       signOut: () => {
-        navigate("/");
-      }, // 로그아웃 시 홈으로 이동
+        navigate("/"); // 로그아웃 시 홈으로 이동
+      },
     }),
     []
   );
@@ -309,10 +315,10 @@ function DashboardLayoutAccountSidebar(props) {
         }}
       >
         <Box sx>
-          {/* Tab 컴포넌트 pathname */}
-          <CustomizedTabs setPathname={setPathname} />
+          {/* 네비게이션 segment가 Link일 때만 탭 UI 표시 */}
+          {<CustomizedTabs setPathname={setPathname} pathname={pathname} />}
         </Box>
-        {/* (임시) 페이지 콘텐츠 컴포넌트에 pathname 전달 */}
+        {/* 페이지 콘텐츠 컴포넌트에 pathname 전달 */}
         <DemoPageContent pathname={pathname} />
       </DashboardLayout>
     </AppProvider>
