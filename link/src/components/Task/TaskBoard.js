@@ -13,7 +13,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { DialogContent, DialogContentText } from "@mui/material";
+import { DialogContent, DialogContentText, Typography } from "@mui/material";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -210,6 +210,7 @@ const TaskBoard = () => {
       >
         <DialogContent style={{ overflow: "auto", maxHeight: "80vh" }}>
           <DialogTitle>
+            <Typography variant="h6"> 작업 이름: 
             {isEditing ? (
               <TextField
                 fullWidth
@@ -221,6 +222,7 @@ const TaskBoard = () => {
             ) : (
               selectedTask?.title
             )}
+            </Typography>
           </DialogTitle>
           <DialogTitle>
             {isEditing ? (
