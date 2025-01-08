@@ -17,7 +17,7 @@ DatePicker 사용을 위해 install 해야 합니다.
   npm install @mui/x-date-pickers
   npm install dayjs
 ```
-Dependencies에 추가는 되어 있으나 혹시 모르니 npm install 한번씩 부탁드려요.
+위 패키지 설치 한번씩 부탁드려요.
 
 ```bash
 npm install
@@ -53,7 +53,7 @@ npm install
 ```
 
 ## **구현 현황**
-1. **회원가입, 로그인 페이지**
+1. **회원가입, 로그인 페이지 구현**
    - 회원가입, 로그인 UI 구현 완료 (로직은 미구현)
    - 이메일, 비밀번호, 비밀번호 확인, 이름 입력 필드 및 약관 동의 체크박스 추가
    - 회원가입 버튼 및 로그인으로 돌아가기 버튼 구현
@@ -61,13 +61,11 @@ npm install
 
 2. **기본 라우팅 설정**
    - React Router를 활용하여 페이지 간 이동 가능하도록 기본적인 라우팅 설정 완료 
-   - / (로그인 페이지) -> /register(회원가입 페이지) -> 로그인 페이지에서 로그인 버튼 누르면 Dashboard (임시)
+   - 현재 아이디, 비밀번호, 안 넣어도 진행됩니다. (추후 구현)
+   - / (로그인 페이지) -> /register(회원가입 페이지) 
+                      -> 로그인 페이지에서 로그인 버튼 누르면 MainTemplate 
 
-3. **대쉬보드 적용**
-   - 강사님께서 쓰신 대쉬보드 UI를 프로젝트에 적용 (MUI(Material-UI))
-   - 대쉬보드의 기본 메뉴 및 사용자 Logout시 다시 로그인 페이지로 이동
-
-4. **Tabs 추가**
+3. **Tabs 구현**
    - 대쉬보드, 작업, 타임라인, 게시판 tab 추가 
    - 각 아이템의 pathname 설정 후, DemoPageContent에 임시로 출력 
    - MUI(Material-UI)를 사용
