@@ -1,21 +1,76 @@
 import React from "react";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
+import { Typography, Box, Grid, Divider } from "@mui/material";
 
-const TaskDetail = ({ task, onClose }) => {
-  // task가 null인 경우 렌더링하지 않도록 처리
-  // 처리해 주지 않으면 닫기 버튼을 눌렀을 때 오류 발생
+const TaskDetail = ({ task }) => {
+  // task가 null인 경우 렌더링하지 않음
   if (!task) {
     return null;
   }
+
   return (
     <DialogContent>
-      <DialogContentText>
-        <p>
-          <strong>작성자:</strong> {task.author}
-        </p>
-        <p>{task.content}</p>
-      </DialogContentText>
+      <Box>
+        <Grid container spacing={2}>
+          {/* 작업 제목 */}
+          <Grid item xs={12}>
+            <Typography variant="h6" color="primary">
+              작업 제목
+            </Typography>
+            <Typography variant="body1">{task.title}</Typography>
+          </Grid>
+
+          <Divider sx={{ my: 2, width: "100%" }} />
+
+          {/* 우선순위 */}
+          <Grid item xs={6}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              우선순위
+            </Typography>
+            <Typography variant="body1">{task.priority}</Typography>
+          </Grid>
+
+          {/* 상태 */}
+          <Grid item xs={6}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              상태
+            </Typography>
+            <Typography variant="body1">{task.status}</Typography>
+          </Grid>
+
+          <Divider sx={{ my: 2, width: "100%" }} />
+
+          {/* 진행기간 */}
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              진행기간
+            </Typography>
+            <Typography variant="body1">
+              {task.startDate} ~ {task.endDate}
+            </Typography>
+          </Grid>
+
+          <Divider sx={{ my: 2, width: "100%" }} />
+
+          {/* 담당자 */}
+          <Grid item xs={6}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              담당자
+            </Typography>
+            <Typography variant="body1">{task.author}</Typography>
+          </Grid>
+
+          <Divider sx={{ my: 2, width: "100%" }} />
+
+          {/* 내용 */}
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              내용
+            </Typography>
+            <Typography variant="body1">{task.content}</Typography>
+          </Grid>
+        </Grid>
+      </Box>
     </DialogContent>
   );
 };

@@ -57,13 +57,14 @@ function DemoPageContent({ pathname }) {
         textAlign: "center",
       }}
     >
-      <Typography>현재 페이지 주소 {pathname}</Typography>{" "}
+      {/* <Typography>현재 페이지 주소 {pathname}</Typography>{" "} */}
       {/* 현재 페이지 주소 출력(임시)*/}
       {/* 페이지 주소에 따라 컴포넌트 렌더링 */}
       {/* pathname만 넣어주면 컨텐츠에 반영 되는 코드 */}
-      {pathname === "/dashboard" && <Dashboard />}
+      {pathname === "/link" && <Dashboard />}
       {pathname === "/board" && <Board />}
       {pathname === "/taskboard" && <TaskBoard />}
+      {pathname === "/project" && <Typography>Project</Typography>}
     </Box>
   );
 }
@@ -236,7 +237,7 @@ function CustomizedTabs({ setPathname, pathname }) {
     // 각 탭에 맞는 경로 설정
     switch (newValue) {
       case 0:
-        setPathname("/dashboard");
+        setPathname("/link");
         break;
       case 1:
         setPathname("/taskboard");
@@ -248,7 +249,7 @@ function CustomizedTabs({ setPathname, pathname }) {
         setPathname("/board");
         break;
       default:
-        setPathname("/dashboard");
+        setPathname("/link");
     }
   };
 
@@ -273,7 +274,7 @@ function CustomizedTabs({ setPathname, pathname }) {
 function DashboardLayoutAccountSidebar(props) {
   const navigate = useNavigate();
   const { window } = props;
-  const [pathname, setPathname] = React.useState("/main"); // 초기 경로 설정
+  const [pathname, setPathname] = React.useState("/link"); // link로 초기 경로 설정 (대쉬보드 보이는 화면)
 
   const router = React.useMemo(() => {
     return {

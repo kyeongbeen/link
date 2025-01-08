@@ -98,7 +98,7 @@ const TaskBoard = () => {
   };
 
   const handleSaveEdit = () => {
-    // 날짜 포맷팅 
+    // 날짜 포맷팅
     const updatedTask = {
       ...editedTask,
       startDate: formatDateToKrTime(editedTask.startDate),
@@ -202,27 +202,27 @@ const TaskBoard = () => {
       />
 
       {/* 작업 상세 다이얼로그 */}
+      {/* 수정 모드 off일 때는 null 반영 */}
+      {/* 수정 모드 on일 때는 수정할 수 있는 TextField로 변경 */}
+      {/* Task 상세 레이아웃은 TaskDetail에서 작업*/}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
         fullWidth
         maxWidth="sm"
       >
-        <DialogContent style={{ overflow: "auto", maxHeight: "80vh" }}>
+        <DialogContent style={{ overflow: "auto", maxHeight: "100vh" }}>
           <DialogTitle>
-            <Typography variant="h6"> 작업 이름: 
-            {isEditing ? (
-              <TextField
-                fullWidth
-                value={editedTask?.title}
-                onChange={(e) =>
-                  setEditedTask({ ...editedTask, title: e.target.value })
-                }
-              />
-            ) : (
-              selectedTask?.title
-            )}
-            </Typography>
+              {isEditing ? (
+                <TextField
+                  label="제목"
+                  fullWidth
+                  value={editedTask?.title}
+                  onChange={(e) =>
+                    setEditedTask({ ...editedTask, title: e.target.value })
+                  }
+                />
+              ) : (null)}
           </DialogTitle>
           <DialogTitle>
             {isEditing ? (
@@ -240,9 +240,7 @@ const TaskBoard = () => {
                   <MenuItem value="하">하</MenuItem>
                 </Select>
               </FormControl>
-            ) : (
-              selectedTask?.priority
-            )}
+            ) : (null)}
           </DialogTitle>
           <DialogTitle>
             {isEditing ? (
@@ -260,11 +258,9 @@ const TaskBoard = () => {
                   <MenuItem value="완료">완료</MenuItem>
                 </Select>
               </FormControl>
-            ) : (
-              selectedTask?.status
-            )}
+            ) : (null)}
           </DialogTitle>
-          
+
           {isEditing ? (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
@@ -284,14 +280,10 @@ const TaskBoard = () => {
                 renderInput={(params) => <TextField {...params} fullWidth />}
               />
             </LocalizationProvider>
-          ) : (
-            <DialogTitle>
-              {selectedTask?.startDate} ~ {selectedTask?.endDate}
-            </DialogTitle>
-          )}
+          ) : (null)}
           {isEditing ? (
             <TextField
-              style={{marginBottom: "20px"}} 
+              label="내용"
               fullWidth
               multiline
               rows={10}
@@ -299,6 +291,7 @@ const TaskBoard = () => {
               onChange={(e) =>
                 setEditedTask({ ...editedTask, content: e.target.value })
               }
+              style={{ marginBottom: "20px", marginTop: "20px" }}
             />
           ) : (
             <TaskDetail task={selectedTask} />
@@ -386,7 +379,7 @@ const TaskBoard = () => {
             onChange={(e) =>
               setNewTask({ ...newTask, content: e.target.value })
             }
-            style={{ marginBottom: "20px", marginTop: "20px" }}
+            style={{ marginTop: "20px" }}
           />
         </DialogContentText>
         <DialogActions>

@@ -27,7 +27,7 @@ const Board = () => {
   const [editedPost, setEditedPost] = useState(null); // 수정 중인 게시글
   const [newReply, setNewReply] = useState(""); // 새로운 댓글 내용
   const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
-  const [newPost, setNewPost] = useState({ title: "", content: ""}); // 새로운 게시글 내용
+  const [newPost, setNewPost] = useState({ title: "", content: "" }); // 새로운 게시글 내용
 
   // 날짜 형식 변환 함수
   const formatDateToKrTime = (date) => {
@@ -85,13 +85,20 @@ const Board = () => {
   };
 
   const handleSaveEdit = () => {
+    // 수정할 게시글에서 기존 댓글을 포함
+    const updatedPost = {
+      ...editedPost,
+      replys: selectedPost.replys, // 기존 댓글 유지
+    };
+
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
-        post.id === editedPost.id ? { ...post, ...editedPost } : post
+        post.id === updatedPost.id ? { ...post, ...updatedPost } : post
       )
     );
+
     setIsEditing(false); // 수정 모드 해제
-    setSelectedPost(editedPost); // 수정된 게시글로 선택된 게시글 변경
+    setSelectedPost(updatedPost); // 수정된 게시글로 선택된 게시글 변경
   };
 
   // 게시글 삭제
@@ -229,9 +236,7 @@ const Board = () => {
                   setEditedPost({ ...editedPost, title: e.target.value })
                 }
               />
-            ) : (
-              selectedPost?.title
-            )}
+            ) : null}
           </DialogTitle>
           {isEditing ? (
             <TextField
@@ -276,9 +281,12 @@ const Board = () => {
                 </p>
                 <p>{reply.content}</p>
                 <DialogActions>
-                    <Button onClick={() => handleDeleteReply(reply)} color="error">
-                        삭제
-                    </Button>
+                  <Button
+                    onClick={() => handleDeleteReply(reply)}
+                    color="error"
+                  >
+                    삭제
+                  </Button>
                 </DialogActions>
               </div>
             ))}
