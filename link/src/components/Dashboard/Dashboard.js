@@ -4,15 +4,40 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import { useState, useEffect } from 'react';
+
 
 // 페이지 콘텐츠 컴포넌트 (컨텐츠 내용물)
 function Dashboard() {
-  const taskData = {
+  const [taskData, setTaskData] = useState({
     totalTasks: 0,
     completedTasks: 0,
     inProgressTasks: 0,
-    notStartedTasks: 0,
-  };
+    inCompletedTasks: 0,
+  });
+
+  useEffect(() => {
+    // 랜덤 작업 배열 생성 (예: 25개의 작업)
+    const tasks = Array.from({ length: 25 }, () => {
+      const randomIndex = Math.floor(Math.random() * 3);
+      return ["FINISH", "ONGOING", "INCOMPLETE"][randomIndex];
+    });
+
+    // 작업 상태별 개수 계산
+    const completedTasks = tasks.filter((task) => task === "FINISH").length;
+    const inProgressTasks = tasks.filter((task) => task === "ONGOING").length;
+    const notCompletedTasks = tasks.filter((task) => task === "INCOMPLETE").length;
+
+    // 상태 업데이트
+    setTaskData({
+      totalTasks: tasks.length,
+      completedTasks,
+      inProgressTasks,
+      notCompletedTasks,
+    });
+  }, []); // 컴포넌트가 처음 렌더링될 때 한 번 실행
+
+  
   return (
     <Box
       sx={{
@@ -30,10 +55,10 @@ function Dashboard() {
         }}
       >
         {[
-          { title: "총 작업", count: taskData.totalTasks, color: "primary" },
-          { title: "완료된 작업", count: taskData.completedTasks, color: "success.main" },
-          { title: "진행중인 작업", count: taskData.inProgressTasks, color: "warning.main" },
-          { title: "미완료 작업", count: taskData.notStartedTasks, color: "error.main" },
+          { title: "TOTAL", count: taskData.totalTasks, color: "primary" },
+          { title: "FINISH", count: taskData.completedTasks, color: "success.main" },
+          { title: "ONGOING", count: taskData.inProgressTasks, color: "warning.main" },
+          { title: "INCOMPLETE", count: taskData.notCompletedTasks, color: "error.main" },
         ].map((task, index) => (
           <Grid2 
             item
