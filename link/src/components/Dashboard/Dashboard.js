@@ -5,6 +5,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 
+
 // 페이지 콘텐츠 컴포넌트 (컨텐츠 내용물)
 function Dashboard() {
   const taskData = {
@@ -21,12 +22,14 @@ function Dashboard() {
         pt: 3, // 위쪽 여백 추가 (좌우 여백과 동일하게 설정)
       }}
     >
+
       <Grid2
         container
         spacing={2} // 카드 간 간격
         sx={{
           width: "100%", // Grid 컨테이너가 부모 요소를 채움
           justifyContent: "space-between", // 카드 간 간격을 균등하게
+
         }}
       >
         {[

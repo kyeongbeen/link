@@ -28,6 +28,7 @@ import { useNavigate } from "react-router-dom";
 import Board from "./Board/Board";
 import TaskBoard from "./Task/TaskBoard";
 import Dashboard from "./Dashboard/Dashboard";
+import Timeline from "./Timeline/Timeline"
 
 // 내비게이션 메뉴 설정
 const NAVIGATION = [
@@ -64,6 +65,7 @@ function DemoPageContent({ pathname }) {
       {pathname === "/link" && <Dashboard />}
       {pathname === "/board" && <Board />}
       {pathname === "/taskboard" && <TaskBoard />}
+      {pathname === "/timeline" && <Timeline />}
       {pathname === "/project" && <Typography>Project</Typography>}
     </Box>
   );
