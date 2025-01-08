@@ -48,6 +48,7 @@ npm install
                └─TaskBoard.js
                └─TaskDetail.js
                └─TaskPagenation.js
+            └─MainTemplate.js
         └─...
 ```
 
@@ -86,6 +87,12 @@ npm install
 
 7. **게시판 수정시 댓글이 지워짐 문제**
    - 수정 예정 
+
+8. **대쉬보드 구현** 
+   - MainTemplate.js에서 메인 레이아웃을 구현
+   - Dashboard.js는 대쉬보드 컴포넌트로 수정
+
+
 
 
 

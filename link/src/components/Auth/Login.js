@@ -24,7 +24,7 @@ const Login = () => {
   // 로그인 성공 시 대시보드 페이지로 이동 (로그인 로직 미구현)
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate("/dashboard");
+    navigate("/main");
   };
   // 회원가입 페이지 이동
   const handleRegister = () => {
