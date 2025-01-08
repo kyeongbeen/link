@@ -69,7 +69,7 @@ npm install
 
 3. **Tabs 구현**
    - 대쉬보드, 작업, 타임라인, 게시판 tab 추가 
-   - 각 아이템의 pathname 설정 후, DemoPageContent에 임시로 출력 
+   - 각 아이템의 pathname 설정 후, DemoPageContent에 출력 
    - MUI(Material-UI)를 사용
 
 5. **게시판 구현**
