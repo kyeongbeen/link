@@ -30,7 +30,7 @@ const Board = () => {
   const [newReply, setNewReply] = useState(""); // 새로운 댓글 내용
   const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
   const [posts, setPosts] = useState([]); // 게시글 목록
-  const [newPost, setNewPost] = useState({ title: "", content: "" }); // 새로운 게시글 내용
+  const [newPost, setNewPost] = useState(0); // 새로운 게시글 내용
 
   // 날짜 변환 함수
   const formatDateToKrTime = (date) => {
@@ -43,17 +43,6 @@ const Board = () => {
     return dayjsDate.format("YYYY-MM-DD"); // 원하는 형식으로 변환
   };
 
-  
-  // const [posts, setPosts] = useState(
-  //   Array.from({ length: 25 }, (_, index) => ({
-  //     id: index + 1,
-  //     title: `게시글 제목 ${index + 1}`,
-  //     author: `작성자 ${index + 1}`,
-  //     content: `게시글 내용 ${index + 1}의 내용입니다.`,
-  //     date: formatDateToKrTime(new Date()),
-  //     replys: [], // 댓글 배열 추가
-  //   }))
-  // );
   // 게시글 목록 불러오기
   useEffect(() => {
     const getPosts = async () => {
@@ -197,9 +186,22 @@ const Board = () => {
       // 게시글 생성 API 호출
       const response = await axios.post("http://localhost:8080/post/create", 
         newPostData);
-      // 새로 생성된 게시글을 기존 작업 목록에 추가 
-      setPosts((prevPosts) => [response.data, ...prevPosts]);
-      setOpenCreateDialog(false); // 다이얼로그 닫기
+      console.log("새로 생성된 게시글: ", response.data);
+      
+      // 새로 데이터 가져오기 (새로 생성된 게시글이 반영이 안 돼서 그냥 다시 불러옴)
+      const getResponse = await axios.get("http://localhost:8080/post/list");
+      setPosts(getResponse.data);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) => ({
+          ...post,
+          date: formatDateToKrTime(post.createDate),
+        }))
+      )
+
+      // 다이얼로그 닫기
+      setOpenCreateDialog(false);
+
+      alert("새 게시글이 작성되었습니다.");
     } catch (error) {
       console.error("게시글을 추가하는 중 오류 발생: ", error);
     }
@@ -217,7 +219,7 @@ const Board = () => {
       </Button>
       {/* 게시판 목록 테이블 */}
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 850 }} aria-label="게시글 목록">
+        <Table sx={{ minWidth: 850 }}>
           <TableHead>
             <TableRow>
               <TableCell align="center">제목</TableCell>

@@ -23,7 +23,7 @@ const PostDetail = ({ post }) => {
           작성자
         </Typography>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          {post.author}
+          {post.authorId}
         </Typography>
 
         <Divider sx={{ my: 2 }} />

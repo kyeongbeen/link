@@ -218,7 +218,7 @@ const TaskBoard = () => {
       status: newTask.status,
       projectId: 1, // 실제 프로젝트 ID로 변경 (추후 수정, 지금은 테스트)
     };
-
+    console.log("보내질 데이터: ", newTaskData);
     try {
       // 새 작업 생성 API 호출
       const response = await axios.post(
@@ -266,7 +266,7 @@ const TaskBoard = () => {
       </Button>
       {/* 작업 목록 테이블 */}
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 850 }} aria-label="게시글 목록">
+        <Table sx={{ minWidth: 850 }}>
           <TableHead>
             <TableRow>
               <TableCell align="center">상태</TableCell>
@@ -330,9 +330,8 @@ const TaskBoard = () => {
           <DialogTitle>
             {isEditing ? (
               <FormControl fullWidth>
-                <InputLabel id="priority-label">우선순위</InputLabel>
+                <InputLabel>우선순위</InputLabel>
                 <Select
-                  labelId="priority-label"
                   value={editedTask?.taskPriority}
                   onChange={(e) =>
                     setEditedTask({
@@ -351,9 +350,8 @@ const TaskBoard = () => {
           <DialogTitle>
             {isEditing ? (
               <FormControl fullWidth>
-                <InputLabel id="status-label">상태</InputLabel>
+                <InputLabel>상태</InputLabel>
                 <Select
-                  labelId="status-label"
                   value={editedTask?.status}
                   onChange={(e) =>
                     setEditedTask({ ...editedTask, status: e.target.value })
@@ -432,9 +430,8 @@ const TaskBoard = () => {
             style={{ marginBottom: "20px" }}
           />
           <FormControl fullWidth style={{ marginBottom: "20px" }}>
-            <InputLabel id="priority-label">우선순위</InputLabel>
+            <InputLabel>우선순위</InputLabel>
             <Select
-              labelId="priority-label"
               value={newTask.taskPriority}
               onChange={(e) =>
                 setNewTask({ ...newTask, taskPriority: e.target.value })
@@ -446,9 +443,8 @@ const TaskBoard = () => {
             </Select>
           </FormControl>
           <FormControl fullWidth style={{ marginBottom: "20px" }}>
-            <InputLabel id="status-label">상태</InputLabel>
+            <InputLabel>상태</InputLabel>
             <Select
-              labelId="status-label"
               value={newTask.status}
               onChange={(e) =>
                 setNewTask({ ...newTask, status: e.target.value })
