@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TaskDetail from "./TaskDetail";
 import PaginationComponent from "./TaskPagenation";
 import Table from "@mui/material/Table";
@@ -18,11 +18,8 @@ import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { Form } from "react-router-dom";
-
-/**
- * 추후 API 연동을 할 때 useState의 author 추가
- */
+import axios from "axios";
+import dayjs from "dayjs";
 
 const TaskBoard = () => {
   const tasksPerPage = 5; // 작업 페이지당 작업 수
@@ -30,42 +27,96 @@ const TaskBoard = () => {
   const [selectedTask, setSelectedTask] = useState(null); // 선택된 작업
   const [openDialog, setOpenDialog] = useState(false); // 다이얼로그 열림 여부
   const [isEditing, setIsEditing] = useState(false); // 수정 중인지 여부
-  const [editedTask, setEditedTask] = useState(null); // 수정 중인 작업
+  const [editedTask, setEditedTask] = useState(); // 수정 중인 작업
   const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
+  const [tasks, setTasks] = useState([]); 
   const [newTask, setNewTask] = useState({
+    assignedUser: 0,
     title: "",
     content: "",
-    priority: "하",
-    status: "미진행",
-    startDate: null, // 작업 시작 일
-    endDate: null, // 작업 마감 일
-    date: null, // 작성 일
-  });
+    taskPriority: "HIGH",
+    status: "FINISH",
+    startDate: null, 
+    deadline: null, 
+    date: null, 
+  }); // 새 작업 데이터, Default 값 설정
 
-  // 날짜 형식 변환 함수
+
+  // 날짜 변환 함수
   const formatDateToKrTime = (date) => {
     const options = {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
     };
-    return new Date(date).toLocaleString("ko-KR", options).replace(",", "");
+    const dayjsDate = dayjs(date); // dayjs로 변환
+    return dayjsDate.format("YYYY-MM-DD"); // 원하는 형식으로 변환
   };
 
-  // 작업 목록 데이터 (더미 데이터)
-  const [tasks, setTasks] = useState(
-    Array.from({ length: 25 }, (_, index) => ({
-      id: index + 1,
-      title: `작업명 ${index + 1}`,
-      author: `담당자 ${index + 1}`,
-      priority: index % 3 === 0 ? "상" : index % 3 === 1 ? "중" : "하",
-      status: index % 3 === 0 ? "진행중" : index % 3 === 1 ? "미진행" : "완료",
-      content: `작업 ${index + 1}의 내용입니다.`,
-      startDate: formatDateToKrTime(new Date()),
-      endDate: formatDateToKrTime(new Date()),
-      date: formatDateToKrTime(new Date()),
-    }))
-  );
+  // 우선순위 한글로 변경
+  const getPriority = (taskPriority) => {
+    switch (taskPriority) {
+      case "HIGH":
+        return "상";
+
+      case "MEDIUM":
+        return "중";
+
+      case "LOW":
+        return "하";
+
+      default:
+        return "없음";
+    }
+  };
+
+  // 상태 한글로 변경
+  const getStatus = (status) => {
+    switch (status) {
+      case "FINISH":
+        return "완료";
+
+      case "ONGOING":
+        return "진행중";
+
+      case "INCOMPLETE":
+        return "미완료";
+
+      case "DELAY":
+        return "지연";
+
+      default:
+        return "없음";
+    }
+  };
+
+  // 작업 목록 불러오기
+  useEffect(() => {
+    const getTasks = async () => {
+      try {
+        // 작업 목록 API 호출
+        const response = await axios.get(
+          `http://localhost:8080/task/lists?projectId=${1}`
+        ); // 테스트를 위해 1로 설정
+        setTasks(response.data); // API 데이터로 상태 업데이트
+
+        // 가져 온 데이터 상태, 우선순위, 마감일 형식 변경
+        setTasks((prevTasks) =>
+          prevTasks.map((task) => ({
+            ...task,
+            status: getStatus(task.status),
+            taskPriority: getPriority(task.taskPriority),
+            startDate: formatDateToKrTime(task.startDate),
+            deadline: formatDateToKrTime(task.deadline),
+          }))
+        );
+      } catch (error) {
+        console.error("작업 목록을 가져오는 중 오류 발생:", error);
+      }
+    };
+
+    getTasks(); // 작업 목록 데이터 불러오기
+  }, []);
 
   // 전체 페이지 수 계산
   const totalPage = Math.ceil(tasks.length / tasksPerPage);
@@ -92,62 +143,114 @@ const TaskBoard = () => {
     setIsEditing(false);
   };
 
-  // 작업 수정
+  // 수정 시작
   const handleEdit = () => {
     setIsEditing(true); // 수정 모드로 변경
+
   };
 
-  const handleSaveEdit = () => {
-    // 날짜 포맷팅
-    const updatedTask = {
-      ...editedTask,
-      startDate: formatDateToKrTime(editedTask.startDate),
-      endDate: formatDateToKrTime(editedTask.endDate),
-    };
+  // 수정 저장
+  const handleSaveEdit = async() => {
+    try {
+      // 수정 API 호출
+      await axios.patch('http://localhost:8080/task/lists', editedTask, {
+       headers: {  
+        'Content-Type': 'application/json' 
+      }
+      });
 
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-      )
-    );
-    setIsEditing(false); // 수정 모드 해제
-    setSelectedTask(updatedTask); // 수정된 게시글로 선택된 게시글 변경
+      // 수정된 데이터 형식 변경
+      editedTask.status = getStatus(editedTask.status);
+      editedTask.taskPriority = getPriority(editedTask.taskPriority);
+      editedTask.startDate = formatDateToKrTime(editedTask.startDate);
+      editedTask.deadline = formatDateToKrTime(editedTask.deadline);
+      
+      // UI에 수정된 데이터 반영
+      setTasks((prevTasks) =>
+        prevTasks.map((t) => (t.taskId === editedTask.taskId ? editedTask : t))
+      );
+
+      setIsEditing(false); // 수정 모드 해제
+      alert('작업이 성공적으로 수정되었습니다.');
+    } catch (error) {
+      console.error('오류: ', error);
+      console.log("API 응답 데이터:", editedTask);
+      alert('작업이 수행되지 못했습니다.');
+    }
   };
 
   // 작업 삭제
-  const handleDelete = () => {
-    setTasks((prevTasks) =>
-      prevTasks.filter((task) => task.id !== selectedTask.id)
-    );
-    handleCloseDialog();
+  const handleDelete = async (task) => {
+    setSelectedTask(task);
+    // 삭제할 작업의 URL
+    const URL = `http://localhost:8080/task/lists/${task.taskId}`;
+
+    try {
+      // 삭제 API 호출
+      const response = await axios.delete(URL);
+      const tasks = response.data;
+
+      // 삭제된 작업을 바로 tasks 목록에서 제거
+      setTasks((prevTasks) =>
+        prevTasks.filter((t) => t.taskId !== task.taskId)
+      );
+
+      setOpenDialog(false);
+      alert("작업이 성공적으로 삭제되었습니다.");
+
+      return tasks;
+    } catch (error) {
+      alert("작업 삭제 실패했습니다.");
+      console.error("작업 삭제 중 오류 발생:", error);
+      return null; // 실패 시 null 반환
+    }
   };
 
-  // 새로운 작업 추가
-  const handleCreateTask = () => {
-    if (
-      newTask.title.trim() &&
-      newTask.content.trim() &&
-      newTask.startDate &&
-      newTask.endDate
-    ) {
-      const newTaskData = {
-        id: tasks.length + 1,
-        ...newTask,
-        author: `작업자 ${tasks.length + 1}`, // 작성자는 임시로 게시글 id로 설정
-        startDate: formatDateToKrTime(newTask.startDate),
-        endDate: formatDateToKrTime(newTask.endDate),
-        date: formatDateToKrTime(new Date()),
-      };
-      setTasks((prevTasks) => [newTaskData, ...prevTasks]);
-      setNewTask({
-        title: "",
-        content: "",
-        priority: "하",
-        status: "미진행",
-        startDate: null,
-        endDate: null,
-      });
+  // 새 작업 생성
+  const handleCreateTask = async () => {
+    const newTaskData = {
+      assignedUser: newTask.assignedUser || 1,
+      title: newTask.title,
+      content: newTask.content,
+      startDate: newTask.startDate,
+      deadline: newTask.deadline,
+      taskPriority: newTask.taskPriority,
+      status: newTask.status,
+      projectId: 1, // 실제 프로젝트 ID로 변경 (추후 수정, 지금은 테스트)
+    };
+
+    try {
+      // 새 작업 생성 API 호출
+      const response = await axios.post(
+        "http://localhost:8080/task/new",
+        newTaskData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      // 가져 온 데이터 우선순위, 상태, 마감일 형식 변경
+      response.data.status = getStatus(response.data.status);
+      response.data.taskPriority = getPriority(response.data.taskPriority);
+      response.data.startDate = formatDateToKrTime(response.data.startDate);
+      response.data.deadline = formatDateToKrTime(response.data.deadline);
+
+      // 새로 생성된 작업을 기존 작업 목록에 추가
+      setTasks((prevTasks) => [response.data, ...prevTasks]);
+
       setOpenCreateDialog(false);
+
+      alert("새 작업이 성공적으로 생성되었습니다.");
+    } catch (error) {
+      console.error("오류 :", error);
+
+      // 실패 시 서버 오류 메시지 표시
+      if (error.response) {
+        alert(`서버 오류: ${error.response.data.message || "알 수 없는 오류"}`);
+      } else {
+        alert("작업 생성 실패했습니다.");
+      }
     }
   };
 
@@ -178,17 +281,17 @@ const TaskBoard = () => {
           <TableBody>
             {currentTasks.map((task) => (
               <TableRow
-                key={task.id}
+                key={task.taskId}
                 onClick={() => handleTaskClick(task)}
                 style={{ cursor: "pointer" }}
               >
                 <TableCell align="center">{task.status}</TableCell>
                 <TableCell align="center">{task.title}</TableCell>
-                <TableCell align="center">{task.author}</TableCell>
-                <TableCell align="center">{task.priority}</TableCell>
+                <TableCell align="center">{task.assignedUser}</TableCell>
+                <TableCell align="center">{task.taskPriority}</TableCell>
                 <TableCell align="right">{task.startDate}</TableCell>
                 <TableCell align="center">~</TableCell>
-                <TableCell align="left">{task.endDate}</TableCell>
+                <TableCell align="left">{task.deadline}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -213,16 +316,16 @@ const TaskBoard = () => {
       >
         <DialogContent style={{ overflow: "auto", maxHeight: "100vh" }}>
           <DialogTitle>
-              {isEditing ? (
-                <TextField
-                  label="제목"
-                  fullWidth
-                  value={editedTask?.title}
-                  onChange={(e) =>
-                    setEditedTask({ ...editedTask, title: e.target.value })
-                  }
-                />
-              ) : (null)}
+            {isEditing ? (
+              <TextField
+                label="제목"
+                fullWidth
+                value={editedTask?.title}
+                onChange={(e) =>
+                  setEditedTask({ ...editedTask, title: e.target.value })
+                }
+              />
+            ) : null}
           </DialogTitle>
           <DialogTitle>
             {isEditing ? (
@@ -230,17 +333,20 @@ const TaskBoard = () => {
                 <InputLabel id="priority-label">우선순위</InputLabel>
                 <Select
                   labelId="priority-label"
-                  value={editedTask?.priority}
+                  value={editedTask?.taskPriority}
                   onChange={(e) =>
-                    setEditedTask({ ...editedTask, priority: e.target.value })
+                    setEditedTask({
+                      ...editedTask,
+                      taskPriority: e.target.value,
+                    })
                   }
                 >
-                  <MenuItem value="상">상</MenuItem>
-                  <MenuItem value="중">중</MenuItem>
-                  <MenuItem value="하">하</MenuItem>
+                  <MenuItem value="HIGH">상</MenuItem>
+                  <MenuItem value="MEDIUM">중</MenuItem>
+                  <MenuItem value="LOW">하</MenuItem>
                 </Select>
               </FormControl>
-            ) : (null)}
+            ) : null}
           </DialogTitle>
           <DialogTitle>
             {isEditing ? (
@@ -253,34 +359,30 @@ const TaskBoard = () => {
                     setEditedTask({ ...editedTask, status: e.target.value })
                   }
                 >
-                  <MenuItem value="미진행">미진행</MenuItem>
-                  <MenuItem value="진행중">진행중</MenuItem>
-                  <MenuItem value="완료">완료</MenuItem>
+                  <MenuItem value="INCOMPLETE">미진행</MenuItem>
+                  <MenuItem value="ONGOING">진행중</MenuItem>
+                  <MenuItem value="FINISH">완료</MenuItem>
                 </Select>
               </FormControl>
-            ) : (null)}
+            ) : null}
           </DialogTitle>
-
           {isEditing ? (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="작업 시작 일"
-                // value={editedTask?.startDate}
-                onChange={(date) =>
-                  setEditedTask({ ...editedTask, startDate: date })
-                }
+                // value={editedTask.startDate}
+                onChange={(date) => setEditedTask({...editedTask, startDate: formatDateToKrTime(date),})}
                 renderInput={(params) => <TextField {...params} fullWidth />}
               />
               <DatePicker
                 label="작업 마감 일"
-                // value={editedTask?.endDate}
-                onChange={(date) =>
-                  setEditedTask({ ...editedTask, endDate: date })
-                }
+                // value={editedTask.deadline}
+                onChange={(date) => setEditedTask({...editedTask, deadline: formatDateToKrTime(date),})}
                 renderInput={(params) => <TextField {...params} fullWidth />}
               />
             </LocalizationProvider>
-          ) : (null)}
+          ) : null}
+
           {isEditing ? (
             <TextField
               label="내용"
@@ -288,9 +390,7 @@ const TaskBoard = () => {
               multiline
               rows={10}
               value={editedTask?.content}
-              onChange={(e) =>
-                setEditedTask({ ...editedTask, content: e.target.value })
-              }
+              onChange={(e) => setEditedTask({ ...editedTask, content: e.target.value })}
               style={{ marginBottom: "20px", marginTop: "20px" }}
             />
           ) : (
@@ -302,7 +402,10 @@ const TaskBoard = () => {
             ) : (
               <>
                 <Button onClick={handleEdit}>수정</Button>
-                <Button onClick={handleDelete} color="error">
+                <Button
+                  onClick={() => handleDelete(selectedTask)}
+                  color="error"
+                >
                   삭제
                 </Button>
               </>
@@ -332,14 +435,14 @@ const TaskBoard = () => {
             <InputLabel id="priority-label">우선순위</InputLabel>
             <Select
               labelId="priority-label"
-              value={newTask.priority}
+              value={newTask.taskPriority}
               onChange={(e) =>
-                setNewTask({ ...newTask, priority: e.target.value })
+                setNewTask({ ...newTask, taskPriority: e.target.value })
               }
             >
-              <MenuItem value="상">상</MenuItem>
-              <MenuItem value="중">중</MenuItem>
-              <MenuItem value="하">하</MenuItem>
+              <MenuItem value="HIGH">상</MenuItem>
+              <MenuItem value="MEDIUM">중</MenuItem>
+              <MenuItem value="LOW">하</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth style={{ marginBottom: "20px" }}>
@@ -351,9 +454,9 @@ const TaskBoard = () => {
                 setNewTask({ ...newTask, status: e.target.value })
               }
             >
-              <MenuItem value="미진행">미진행</MenuItem>
-              <MenuItem value="진행중">진행중</MenuItem>
-              <MenuItem value="완료">완료</MenuItem>
+              <MenuItem value="INCOMPLETE">미진행</MenuItem>
+              <MenuItem value="ONGOING">진행중</MenuItem>
+              <MenuItem value="FINISH">완료</MenuItem>
             </Select>
           </FormControl>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -365,8 +468,8 @@ const TaskBoard = () => {
             />
             <DatePicker
               label="작업 마감 일"
-              value={newTask.endDate}
-              onChange={(date) => setNewTask({ ...newTask, endDate: date })}
+              value={newTask.deadline}
+              onChange={(date) => setNewTask({ ...newTask, deadline: date })}
               renderInput={(params) => <TextField {...params} fullWidth />}
             />
           </LocalizationProvider>
