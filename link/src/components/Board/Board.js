@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PostDetail from "./PostDetail";
 import PaginationComponent from "./Pagination";
 import Table from "@mui/material/Table";
@@ -14,6 +14,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { DialogContent, DialogContentText } from "@mui/material";
+import dayjs from "dayjs";
+import axios from "axios";
 
 /**
  * 추후 API 연동할 때 useState에 author 추가
@@ -27,32 +29,53 @@ const Board = () => {
   const [editedPost, setEditedPost] = useState(null); // 수정 중인 게시글
   const [newReply, setNewReply] = useState(""); // 새로운 댓글 내용
   const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
+  const [posts, setPosts] = useState([]); // 게시글 목록
   const [newPost, setNewPost] = useState({ title: "", content: "" }); // 새로운 게시글 내용
 
-  // 날짜 형식 변환 함수
+  // 날짜 변환 함수
   const formatDateToKrTime = (date) => {
     const options = {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
     };
-    return new Date(date).toLocaleString("ko-KR", options).replace(",", "");
+    const dayjsDate = dayjs(date); // dayjs로 변환
+    return dayjsDate.format("YYYY-MM-DD"); // 원하는 형식으로 변환
   };
 
-  // 게시글 목록 데이터
-  const [posts, setPosts] = useState(
-    Array.from({ length: 25 }, (_, index) => ({
-      id: index + 1,
-      title: `게시글 제목 ${index + 1}`,
-      author: `작성자 ${index + 1}`,
-      content: `게시글 내용 ${index + 1}의 내용입니다.`,
-      date: formatDateToKrTime(new Date()),
-      replys: [], // 댓글 배열 추가
-    }))
-  );
+  
+  // const [posts, setPosts] = useState(
+  //   Array.from({ length: 25 }, (_, index) => ({
+  //     id: index + 1,
+  //     title: `게시글 제목 ${index + 1}`,
+  //     author: `작성자 ${index + 1}`,
+  //     content: `게시글 내용 ${index + 1}의 내용입니다.`,
+  //     date: formatDateToKrTime(new Date()),
+  //     replys: [], // 댓글 배열 추가
+  //   }))
+  // );
+  // 게시글 목록 불러오기
+  useEffect(() => {
+    const getPosts = async () => {
+      try {
+        // 게시글 목록 API 호출
+        const response = await axios.get("http://localhost:8080/post/list");
+        setPosts(response.data); // API 데이터로 상태 업데이트
+
+        setPosts((prevPosts) =>
+          prevPosts.map((post) => ({
+            ...post,
+            date: formatDateToKrTime(post.createDate),
+          }))
+        );
+
+      } catch(error) {
+        console.error("게시글 목록을 가져오는 중 오류 발생: ",error);
+      }
+    };
+
+    getPosts();
+  }, []);
 
   // 전체 페이지 수 계산
   const totalPage = Math.ceil(posts.length / postPerPage);
@@ -161,20 +184,26 @@ const Board = () => {
   };
 
   // 새로운 게시글 추가
-  const handleCreatePost = () => {
-    if (newPost.title.trim() && newPost.content.trim()) {
-      const newPostData = {
-        id: posts.length + 1,
-        ...newPost,
-        author: `작성자 ${posts.length + 1}`, // 작성자는 임시로 게시글 id로 설정
-        date: formatDateToKrTime(new Date()),
-        replys: [],
-      };
-      setPosts((prevPosts) => [newPostData, ...prevPosts]);
+  const handleCreatePost = async () => {
+    const newPostData = {
+      authorId: 1, // 임시 (테스트를 위함)
+      title: newPost.title,
+      content: newPost.content,
+      createDate: formatDateToKrTime(new Date()),
+      projectId: 1, // 임시 (테스트를 위함)
+    };
+    console.log("POST로 보내질 데이터: ", newPostData); // null 값이 있나 확인을 위함
+    try {
+      // 게시글 생성 API 호출
+      const response = await axios.post("http://localhost:8080/post/create", 
+        newPostData);
+      // 새로 생성된 게시글을 기존 작업 목록에 추가 
+      setPosts((prevPosts) => [response.data, ...prevPosts]);
       setOpenCreateDialog(false); // 다이얼로그 닫기
-      setNewPost({ title: "", content: "" }); // 입력 필드 초기화
+    } catch (error) {
+      console.error("게시글을 추가하는 중 오류 발생: ", error);
     }
-  };
+  }
 
   return (
     <div style={{ padding: "20px" }}>
@@ -204,7 +233,7 @@ const Board = () => {
                 style={{ cursor: "pointer" }}
               >
                 <TableCell align="center">{post.title}</TableCell>
-                <TableCell align="center">{post.author}</TableCell>
+                <TableCell align="center">{post.authorId}</TableCell>
                 <TableCell align="center">{post.date}</TableCell>
               </TableRow>
             ))}
@@ -225,7 +254,6 @@ const Board = () => {
         fullWidth
         maxWidth="sm"
       >
-        {/* DialogContent overflow를 주어 단일 스크롤바로 만들어 문제 해결 */}
         <DialogContent style={{ overflow: "auto", maxHeight: "80vh" }}>
           <DialogTitle>
             {isEditing ? (
