@@ -83,17 +83,17 @@ npm install
    - 더미 데이터로 테스트까지만 진행
    - API 관련 로직 구현
    - MUI(Material-UI)를 사용
-  ** 작업 페이지 테스트 하실 떄**
-     cors문제 나오시면 벡엔드 SecurityConfig에서 하단의 코드를 추가해주세요! 
-     ```
-      config.setAllowedOrigins(List.of("http://localhost:3000"));  // 프론트엔드 도메인 허용
-      config.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
-     ```
 
 7. **대쉬보드 구현** 
    - MainTemplate.js에서 메인 레이아웃을 구현
    - Dashboard.js는 대쉬보드 컴포넌트로 수정
 
+*. 작업 페이지 테스트 하실 떄
+  cors문제 나오시면 벡엔드 SecurityConfig에서 하단의 코드를 추가해주세요! 
+     ```
+      config.setAllowedOrigins(List.of("http://localhost:3000"));  // 프론트엔드 도메인 허용
+      config.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
+     ```
 
 
 
