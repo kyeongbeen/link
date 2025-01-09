@@ -7,8 +7,9 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Box, T
 
 
 const Timeline = () => {
+    const calendarRef = useRef(null);
     const [openDialog, setOpenDialog] = useState(false); // 다이얼로그 열림 여부
-    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [selectedEvent, setSelectedEvent] = useState(null); // 선택된 작업
     let taskList;
 
     // APi 호출
@@ -95,8 +96,10 @@ const Timeline = () => {
       });
     };
 
+
+
+
     // 달력 기본 세팅
-    let calendarRef = useRef(null);
     useEffect(() => {
             // 
             let calendar = new Calendar(calendarRef.current, {
@@ -111,11 +114,11 @@ const Timeline = () => {
               locale: "ko",
               eventClick: function(info) {
                 const taskId = info.event.id;
-                const task = taskList[taskList.findIndex((task)=> task.taskId = taskId)]
-                
+                const task = taskList[taskList.findIndex((task)=> task.taskId == taskId)]
                 setSelectedEvent({
                   id: task.taskId,
                   assignedUser: task.assignedUser,
+                  assignedUserName: task.assignedUserName,
                   title: task.title,
                   startDateToEndDate : getPeriod(task.startDate, task.deadline),
                   content: task.content,
@@ -137,12 +140,10 @@ const Timeline = () => {
         <div ref={calendarRef} ></div>
         {/* Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>이벤트 정보</DialogTitle>
         <DialogContent>
           {selectedEvent && (
             <Box>
               <Grid container spacing={0}>
-
                 <Grid item xs={12}>
                   <Typography variant="h6" color="black" sx={{wordWrap: "break-word"}}>{selectedEvent.title}</Typography>
                 </Grid>
@@ -155,23 +156,30 @@ const Timeline = () => {
                 </Grid>
 
                 <Grid item xs={6}>
-                    <Typography variant="subtitle1" fontWeight="bold">상태</Typography>
-                    <Typography variant="body1">{selectedEvent.taskStatus}</Typography>
-                  </Grid>
+                  <Typography variant="subtitle1" fontWeight="bold">상태</Typography>
+                  <Typography variant="body1">{selectedEvent.taskStatus}</Typography>
+                </Grid>
 
-                  <Divider sx={{ my:2, width:"100%" }} />
+                <Divider sx={{ my:2, width:"100%" }} />
 
-                    <Grid item xs={12}>
-                      <Typography variant="subtitle1" fontWeight="bold">기간</Typography>
-                      <Typography variant="body1">{selectedEvent.startDateToEndDate}</Typography>
-                    </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1" fontWeight="bold">진행기간</Typography>
+                  <Typography variant="body1">{selectedEvent.startDateToEndDate}</Typography>
+                </Grid>
 
-                  <Divider sx={{ my:2, width:"100%" }} />
+                <Divider sx={{ my:2, width:"100%" }} />
 
-                    <Grid item xs={12}>
-                      <Typography variant="subtitle1" fontWeight="bold">내용</Typography>
-                      <Typography variant="body1" sx={{wordWrap: "break-word"}}>{selectedEvent.content}</Typography>
-                    </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1" fontWeight="bold">담당자</Typography>
+                  <Typography variant="body1">{selectedEvent.assignedUserName}</Typography>
+                </Grid>
+
+                <Divider sx={{ my:2, width:"100%" }} />
+
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1" fontWeight="bold">내용</Typography>
+                  <Typography variant="body1" sx={{wordWrap: "break-word"}}>{selectedEvent.content}</Typography>
+                </Grid>
                 
               </Grid>
             </Box>
