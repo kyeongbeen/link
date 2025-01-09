@@ -27,7 +27,7 @@ const TaskDetail = ({ task }) => {
             <Typography variant="subtitle1" fontWeight="bold">
               우선순위
             </Typography>
-            <Typography variant="body1">{task.priority}</Typography>
+            <Typography variant="body1">{task.taskPriority}</Typography>
           </Grid>
 
           {/* 상태 */}
@@ -46,7 +46,7 @@ const TaskDetail = ({ task }) => {
               진행기간
             </Typography>
             <Typography variant="body1">
-              {task.startDate} ~ {task.endDate}
+              {task.startDate} ~ {task.deadline}
             </Typography>
           </Grid>
 
