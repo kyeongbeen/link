@@ -11,21 +11,64 @@ import {
   Container,
 } from "@mui/material/";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import axios from "axios";
 
 const Login = () => {
   const theme = createTheme();
-  const [checked, setChecked] = useState(false);
   const navigate = useNavigate();
+  const [loginData, setLoginData] = useState({
+    email: "",
+    password: "",
+  });
+  const [token, setToken] = useState(localStorage.getItem("token"));
 
-  // 동의 체크
-  const handleAgree = (event) => {
-    setChecked(event.target.checked);
+  // 로그인 요청
+  const login = async ({ email, password }) => {
+    try {
+      // 폼 데이터 형식으로 변환
+      const formData = new FormData();
+      formData.append("username", email);
+      formData.append("password", password);
+
+      // API 호출
+      const response = await axios.post(
+        "http://localhost:8080/login",
+        formData
+      );
+
+      if (response.data && response.data.token) {
+        setToken(response.data.token);
+        localStorage.setItem("token", response.data.token);
+      } else {
+        throw new Error("token이 응답에 포함되어 있지 않습니다.");
+      }
+    
+      alert("로그인에 성공했습니다.");
+      // 응답 데이터 반환
+      return response.data;
+    } catch (error) {
+      console.error("로그인 실패:", error.response || error.message);
+      throw error;
+    }
   };
-  // 로그인 성공 시 대시보드 페이지로 이동 (로그인 로직 미구현)
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    navigate("/main");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setLoginData({ ...loginData, [name]: value });
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // 기본 이벤트 방지
+    try {
+      const response = await login(loginData);
+      localStorage.setItem("tokenType", response.tokenType);
+      localStorage.setItem("token", response.token);  // token을 로컬 스토리지에 저장
+      navigate("/main") // 리디렉션은 상태가 변경된 후에 이루어져야 함
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // 회원가입 페이지 이동
   const handleRegister = () => {
     navigate("/register");
@@ -83,6 +126,8 @@ const Login = () => {
                       id="email"
                       name="email"
                       label="이메일 주소"
+                      value={loginData.email}
+                      onChange={handleChange}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -93,6 +138,8 @@ const Login = () => {
                       id="password"
                       name="password"
                       label="비밀번호"
+                      value={loginData.password}
+                      onChange={handleChange}
                     />
                   </Grid>
                 </Grid>

@@ -20,6 +20,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import axios from "axios";
 import dayjs from "dayjs";
+import AuthAPI from "../Auth/AuthAPI";
 
 const TaskBoard = () => {
   const tasksPerPage = 5; // 작업 페이지당 작업 수
@@ -93,7 +94,7 @@ const TaskBoard = () => {
   useEffect(() => {
     const getTasks = async () => {
       try {
-        const response = await axios.get(
+        const response = await AuthAPI.get(
           `http://localhost:8080/task/lists?projectId=${1}`
         ); // 테스트를 위해 1로 설정
         setTasks(response.data);
@@ -147,7 +148,7 @@ const TaskBoard = () => {
   // 수정 저장
   const handleSaveEdit = async () => {
     try {
-      await axios.patch("http://localhost:8080/task/lists", editedTask, {
+      await AuthAPI.patch("http://localhost:8080/task/lists", editedTask, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -176,7 +177,7 @@ const TaskBoard = () => {
     setSelectedTask(task);
     const URL = `http://localhost:8080/task/lists/${task.taskId}`;
     try {
-      const response = await axios.delete(URL);
+      const response = await AuthAPI.delete(URL);
       const tasks = response.data;
 
       setTasks((prevTasks) =>
@@ -202,7 +203,7 @@ const TaskBoard = () => {
     };
     console.log("보내질 데이터: ", newTaskData);
     try {
-      const response = await axios.post(
+      const response = await AuthAPI.post(
         "http://localhost:8080/task/new",
         newTaskData,
         {
