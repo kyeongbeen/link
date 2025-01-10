@@ -37,7 +37,7 @@ npm install
     └─src
         └─components
             ├─Auth
-                ├─AuthProvider.js
+                ├─AuthAPI.js
                 ├─Login.js
                 ├─Register.js
             └─Dashboard
@@ -56,7 +56,7 @@ npm install
 
 ## **구현 현황**
 1. **회원가입, 로그인 페이지 구현**
-   - 회원가입, 로그인 UI 구현 완료 (로직은 미구현)
+   - 회원가입, 로그인 UI, 로직 구현 완료 
    - 이메일, 비밀번호, 비밀번호 확인, 이름 입력 필드 및 약관 동의 체크박스 추가
    - 회원가입 버튼 및 로그인으로 돌아가기 버튼 구현
    - MUI(Material-UI)를 사용
