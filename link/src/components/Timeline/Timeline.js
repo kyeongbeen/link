@@ -3,20 +3,23 @@ import { Calendar } from '@fullcalendar/core'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import listPlugin from '@fullcalendar/list'
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Box, Typography, Divider} from "@mui/material";
-
+import { Dialog, DialogActions, Button} from "@mui/material";
+import TimelineTaskDetail from "./TimelineTaskDetail";
+import axios from 'axios';
 
 const Timeline = () => {
     const calendarRef = useRef(null);
     const [openDialog, setOpenDialog] = useState(false); // 다이얼로그 열림 여부
-    const [selectedEvent, setSelectedEvent] = useState(null); // 선택된 작업
-    let taskList;
+    const [selectedTask, setSelectedTask] = useState(null); // 선택된 작업
+    const [isEditing, setIsEditing] = useState(false); // 수정중인지?
+    const [taskList, setTaskList] = useState([]);
+    
 
     // APi 호출
-    const getTaskList = async ( projectId ) => {
+    const getTaskList = ( projectId ) => {
       const URL = "http://localhost:8080/task/lists?projectId=" + projectId;
-      const response = await fetch(URL);
-      let tasks = await response.json();
+      const response = fetch(URL);
+      let tasks = response.json();
       return tasks;
     }
 
@@ -68,128 +71,110 @@ const Timeline = () => {
       }
     }
 
-    // 받아온 데이터를 event에 등록
-    const addEventToCalendar = async ( calendar, projectId ) => {
-      taskList = await getTaskList(projectId);
-      taskList.forEach(task => {
-        if (task.startDate == null) { 
-          calendar.addEvent({
-            id: task.taskId,
-            title: task.title,
-            start: task.deadline
-          });
-        } else if(task.deadline == null) {
-          calendar.addEvent({
-            id: task.taskId,
-            title: task.title,
-            start: task.startDate
-          });
-        }
-        else {
-          calendar.addEvent({
-            id: task.taskId,
-            title: task.title,
-            start: task.startDate,
-            end: task.deadline
-          });
-        }
-      });
+    // 다이얼로그 닫을때 state 변수 세팅
+    const closeDialog = () => {
+      setOpenDialog(false);
+      setIsEditing(false);
+    }
+
+    const setTask = (task) => {
+      setSelectedTask(task);
+      setOpenDialog(true);
+    }
+
+    const handleTaskUpdate = (updatedTask) => {
+      setSelectedTask(updatedTask);
+      setIsEditing(false);
+    }
+
+const getTasks = async (projectId) => {
+  const token =
+    "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6IjFAbGluay5jb20iLCJyb2xlIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzM2NDg2NTkwLCJleHAiOjE3MzY0OTAxOTB9.2qSuCPFeykEWzoa_-GTUXOi5aK6RINDrsx3_hoxpaug";
+  try {
+    const response = await axios.get(
+      `http://localhost:8080/task/lists?projectId=${projectId}`,
+      {
+        headers: { Authorization: token },
+      }
+    );
+    return response.data; // 데이터 반환
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    return [];
+  }
+};
+
+// 데이터 요청 및 이벤트 추가 함수
+const fetchAndSetTasks = async (calendar, projectId) => {
+  const tasks = await getTasks(projectId);
+  if (!Array.isArray(tasks)) {
+    console.error("Fetched tasks are not an array:", tasks);
+    return;
+  }
+  setTaskList(tasks); // taskList 업데이트
+
+  tasks.forEach((task) => {
+    const event = {
+      id: task.taskId,
+      title: task.title,
+      start: task.startDate || task.deadline,
+      end: task.deadline,
     };
+    calendar.addEvent(event);
+  });
+};
+
+useEffect(() => {
+  const calendar = new Calendar(calendarRef.current, {
+    plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
+    initialView: "dayGridMonth",
+    headerToolbar: {
+      left: "prev",
+      center: "title",
+      right: "next",
+    },
+    height: "auto",
+    locale: "ko",
+    eventClick: function (info) {
+      const taskId = info.event.id;
+      const taskIndex = taskList.findIndex((task) => { return task.taskId == taskId })
+      console.log(typeof taskIndex);
 
 
+      if (taskIndex === -1) {console.error(`Task not found for event ID: ${taskId}`); return;}
+        const task = taskList[taskIndex];
+          setTask({
+            id: task.taskId,
+            assignedUser: task.assignedUser,
+            assignedUserName: task.assignedUserName,
+            title: task.title,
+            startDate: task.startDate,
+            endDate: task.deadline,
+            startDateToEndDate: getPeriod(task.startDate, task.deadline),
+            content: task.content,
+            taskPriority: getPriority(task.taskPriority),
+            taskStatus: getStatus(task.status),
+          });
+          setOpenDialog(true);
+    },
+  });
 
+  fetchAndSetTasks(calendar, 1); // 데이터 요청 및 이벤트 추가
+  calendar.render();
+}, []);
 
-    // 달력 기본 세팅
-    useEffect(() => {
-            // 
-            let calendar = new Calendar(calendarRef.current, {
-              plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
-              initialView: "dayGridMonth",
-              headerToolbar: {
-                left: 'prev',
-                center: 'title',
-                right: 'next'
-              },
-              height: "auto",
-              locale: "ko",
-              eventClick: function(info) {
-                const taskId = info.event.id;
-                const task = taskList[taskList.findIndex((task)=> task.taskId == taskId)]
-                setSelectedEvent({
-                  id: task.taskId,
-                  assignedUser: task.assignedUser,
-                  assignedUserName: task.assignedUserName,
-                  title: task.title,
-                  startDateToEndDate : getPeriod(task.startDate, task.deadline),
-                  content: task.content,
-                  taskPriority: getPriority(task.taskPriority),
-                  taskStatus: getStatus(task.status),
-                });
-                setOpenDialog(true);
-              }
-            });
-
-////////////////////                                프로젝트 Id를 파싱받을 수 있게 해야함                             ///////////////////////
-
-            addEventToCalendar(calendar, 1);
-            calendar.render();
-    }, []);
 
   return (
     <div>
         <div ref={calendarRef} ></div>
-        {/* Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogContent>
-          {selectedEvent && (
-            <Box>
-              <Grid container spacing={0}>
-                <Grid item xs={12}>
-                  <Typography variant="h6" color="black" sx={{wordWrap: "break-word"}}>{selectedEvent.title}</Typography>
-                </Grid>
-
-                <Divider sx={{ my:2, width:"100%" }} />
-
-                <Grid item xs={6}>
-                  <Typography variant="subtitle1" fontWeight="bold">우선순위</Typography>
-                  <Typography variant="body1">{selectedEvent.taskPriority}</Typography>
-                </Grid>
-
-                <Grid item xs={6}>
-                  <Typography variant="subtitle1" fontWeight="bold">상태</Typography>
-                  <Typography variant="body1">{selectedEvent.taskStatus}</Typography>
-                </Grid>
-
-                <Divider sx={{ my:2, width:"100%" }} />
-
-                <Grid item xs={12}>
-                  <Typography variant="subtitle1" fontWeight="bold">진행기간</Typography>
-                  <Typography variant="body1">{selectedEvent.startDateToEndDate}</Typography>
-                </Grid>
-
-                <Divider sx={{ my:2, width:"100%" }} />
-
-                <Grid item xs={12}>
-                  <Typography variant="subtitle1" fontWeight="bold">담당자</Typography>
-                  <Typography variant="body1">{selectedEvent.assignedUserName}</Typography>
-                </Grid>
-
-                <Divider sx={{ my:2, width:"100%" }} />
-
-                <Grid item xs={12}>
-                  <Typography variant="subtitle1" fontWeight="bold">내용</Typography>
-                  <Typography variant="body1" sx={{wordWrap: "break-word"}}>{selectedEvent.content}</Typography>
-                </Grid>
-                
-              </Grid>
-            </Box>
-            
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="primary">닫기</Button>
-        </DialogActions>
-      </Dialog>
+          <Dialog open={openDialog} onClose={() => closeDialog()} maxWidth="sm" fullWidth>
+                  <>
+                    <TimelineTaskDetail selectedTask = {selectedTask} />
+                    <DialogActions>
+                      <Button onClick={() => closeDialog()} color="primary">닫기</Button>
+                    </DialogActions>
+                  </> 
+          </Dialog>
     </div>      
   );
 }
