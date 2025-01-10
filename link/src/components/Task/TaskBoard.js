@@ -29,18 +29,17 @@ const TaskBoard = () => {
   const [isEditing, setIsEditing] = useState(false); // 수정 중인지 여부
   const [editedTask, setEditedTask] = useState(); // 수정 중인 작업
   const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
-  const [tasks, setTasks] = useState([]); 
+  const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     assignedUser: 0,
     title: "",
     content: "",
     taskPriority: "HIGH",
     status: "FINISH",
-    startDate: null, 
-    deadline: null, 
-    date: null, 
+    startDate: null,
+    deadline: null,
+    date: null,
   }); // 새 작업 데이터, Default 값 설정
-
 
   // 날짜 변환 함수
   const formatDateToKrTime = (date) => {
@@ -49,8 +48,8 @@ const TaskBoard = () => {
       month: "2-digit",
       day: "2-digit",
     };
-    const dayjsDate = dayjs(date); // dayjs로 변환
-    return dayjsDate.format("YYYY-MM-DD"); // 원하는 형식으로 변환
+    const dayjsDate = dayjs(date);
+    return dayjsDate.format("YYYY-MM-DD");
   };
 
   // 우선순위 한글로 변경
@@ -94,13 +93,11 @@ const TaskBoard = () => {
   useEffect(() => {
     const getTasks = async () => {
       try {
-        // 작업 목록 API 호출
         const response = await axios.get(
           `http://localhost:8080/task/lists?projectId=${1}`
         ); // 테스트를 위해 1로 설정
-        setTasks(response.data); // API 데이터로 상태 업데이트
-
-        // 가져 온 데이터 상태, 우선순위, 마감일 형식 변경
+        setTasks(response.data);
+        console.log("API 응답 데이터:", response.data);
         setTasks((prevTasks) =>
           prevTasks.map((task) => ({
             ...task,
@@ -114,8 +111,7 @@ const TaskBoard = () => {
         console.error("작업 목록을 가져오는 중 오류 발생:", error);
       }
     };
-
-    getTasks(); // 작업 목록 데이터 불러오기
+    getTasks();
   }, []);
 
   // 전체 페이지 수 계산
@@ -146,51 +142,43 @@ const TaskBoard = () => {
   // 수정 시작
   const handleEdit = () => {
     setIsEditing(true); // 수정 모드로 변경
-
   };
 
   // 수정 저장
-  const handleSaveEdit = async() => {
+  const handleSaveEdit = async () => {
     try {
-      // 수정 API 호출
-      await axios.patch('http://localhost:8080/task/lists', editedTask, {
-       headers: {  
-        'Content-Type': 'application/json' 
-      }
+      await axios.patch("http://localhost:8080/task/lists", editedTask, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-
-      // 수정된 데이터 형식 변경
       editedTask.status = getStatus(editedTask.status);
       editedTask.taskPriority = getPriority(editedTask.taskPriority);
       editedTask.startDate = formatDateToKrTime(editedTask.startDate);
       editedTask.deadline = formatDateToKrTime(editedTask.deadline);
-      
-      // UI에 수정된 데이터 반영
+
       setTasks((prevTasks) =>
         prevTasks.map((t) => (t.taskId === editedTask.taskId ? editedTask : t))
       );
 
-      setIsEditing(false); // 수정 모드 해제
-      alert('작업이 성공적으로 수정되었습니다.');
+      setIsEditing(false);
+      alert("작업이 성공적으로 수정되었습니다.");
+      handleCloseDialog();
     } catch (error) {
-      console.error('오류: ', error);
+      console.error("오류: ", error);
       console.log("API 응답 데이터:", editedTask);
-      alert('작업이 수행되지 못했습니다.');
+      alert("작업이 수행되지 못했습니다.");
     }
   };
 
   // 작업 삭제
   const handleDelete = async (task) => {
     setSelectedTask(task);
-    // 삭제할 작업의 URL
     const URL = `http://localhost:8080/task/lists/${task.taskId}`;
-
     try {
-      // 삭제 API 호출
       const response = await axios.delete(URL);
       const tasks = response.data;
 
-      // 삭제된 작업을 바로 tasks 목록에서 제거
       setTasks((prevTasks) =>
         prevTasks.filter((t) => t.taskId !== task.taskId)
       );
@@ -202,25 +190,18 @@ const TaskBoard = () => {
     } catch (error) {
       alert("작업 삭제 실패했습니다.");
       console.error("작업 삭제 중 오류 발생:", error);
-      return null; // 실패 시 null 반환
+      return null;
     }
   };
 
   // 새 작업 생성
   const handleCreateTask = async () => {
     const newTaskData = {
-      assignedUser: newTask.assignedUser || 1,
-      title: newTask.title,
-      content: newTask.content,
-      startDate: newTask.startDate,
-      deadline: newTask.deadline,
-      taskPriority: newTask.taskPriority,
-      status: newTask.status,
+      ...newTask,
       projectId: 1, // 실제 프로젝트 ID로 변경 (추후 수정, 지금은 테스트)
     };
-
+    console.log("보내질 데이터: ", newTaskData);
     try {
-      // 새 작업 생성 API 호출
       const response = await axios.post(
         "http://localhost:8080/task/new",
         newTaskData,
@@ -230,22 +211,16 @@ const TaskBoard = () => {
           },
         }
       );
-      // 가져 온 데이터 우선순위, 상태, 마감일 형식 변경
       response.data.status = getStatus(response.data.status);
       response.data.taskPriority = getPriority(response.data.taskPriority);
       response.data.startDate = formatDateToKrTime(response.data.startDate);
       response.data.deadline = formatDateToKrTime(response.data.deadline);
 
-      // 새로 생성된 작업을 기존 작업 목록에 추가
       setTasks((prevTasks) => [response.data, ...prevTasks]);
-
       setOpenCreateDialog(false);
-
       alert("새 작업이 성공적으로 생성되었습니다.");
     } catch (error) {
       console.error("오류 :", error);
-
-      // 실패 시 서버 오류 메시지 표시
       if (error.response) {
         alert(`서버 오류: ${error.response.data.message || "알 수 없는 오류"}`);
       } else {
@@ -259,14 +234,14 @@ const TaskBoard = () => {
       <Button
         variant="contained"
         color="primary"
-        onClick={() => setOpenCreateDialog(true)} // 작업 작성 다이얼로그 열기
+        onClick={() => setOpenCreateDialog(true)}
         style={{ marginBottom: "20px" }}
       >
         추가하기
       </Button>
       {/* 작업 목록 테이블 */}
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 850 }} aria-label="게시글 목록">
+        <Table sx={{ minWidth: 850 }}>
           <TableHead>
             <TableRow>
               <TableCell align="center">상태</TableCell>
@@ -330,9 +305,8 @@ const TaskBoard = () => {
           <DialogTitle>
             {isEditing ? (
               <FormControl fullWidth>
-                <InputLabel id="priority-label">우선순위</InputLabel>
+                <InputLabel>우선순위</InputLabel>
                 <Select
-                  labelId="priority-label"
                   value={editedTask?.taskPriority}
                   onChange={(e) =>
                     setEditedTask({
@@ -351,9 +325,8 @@ const TaskBoard = () => {
           <DialogTitle>
             {isEditing ? (
               <FormControl fullWidth>
-                <InputLabel id="status-label">상태</InputLabel>
+                <InputLabel>상태</InputLabel>
                 <Select
-                  labelId="status-label"
                   value={editedTask?.status}
                   onChange={(e) =>
                     setEditedTask({ ...editedTask, status: e.target.value })
@@ -371,13 +344,23 @@ const TaskBoard = () => {
               <DatePicker
                 label="작업 시작 일"
                 // value={editedTask.startDate}
-                onChange={(date) => setEditedTask({...editedTask, startDate: formatDateToKrTime(date),})}
+                onChange={(date) =>
+                  setEditedTask({
+                    ...editedTask,
+                    startDate: formatDateToKrTime(date),
+                  })
+                }
                 renderInput={(params) => <TextField {...params} fullWidth />}
               />
               <DatePicker
                 label="작업 마감 일"
                 // value={editedTask.deadline}
-                onChange={(date) => setEditedTask({...editedTask, deadline: formatDateToKrTime(date),})}
+                onChange={(date) =>
+                  setEditedTask({
+                    ...editedTask,
+                    deadline: formatDateToKrTime(date),
+                  })
+                }
                 renderInput={(params) => <TextField {...params} fullWidth />}
               />
             </LocalizationProvider>
@@ -390,7 +373,9 @@ const TaskBoard = () => {
               multiline
               rows={10}
               value={editedTask?.content}
-              onChange={(e) => setEditedTask({ ...editedTask, content: e.target.value })}
+              onChange={(e) =>
+                setEditedTask({ ...editedTask, content: e.target.value })
+              }
               style={{ marginBottom: "20px", marginTop: "20px" }}
             />
           ) : (
@@ -432,9 +417,8 @@ const TaskBoard = () => {
             style={{ marginBottom: "20px" }}
           />
           <FormControl fullWidth style={{ marginBottom: "20px" }}>
-            <InputLabel id="priority-label">우선순위</InputLabel>
+            <InputLabel>우선순위</InputLabel>
             <Select
-              labelId="priority-label"
               value={newTask.taskPriority}
               onChange={(e) =>
                 setNewTask({ ...newTask, taskPriority: e.target.value })
@@ -446,9 +430,8 @@ const TaskBoard = () => {
             </Select>
           </FormControl>
           <FormControl fullWidth style={{ marginBottom: "20px" }}>
-            <InputLabel id="status-label">상태</InputLabel>
+            <InputLabel>상태</InputLabel>
             <Select
-              labelId="status-label"
               value={newTask.status}
               onChange={(e) =>
                 setNewTask({ ...newTask, status: e.target.value })
