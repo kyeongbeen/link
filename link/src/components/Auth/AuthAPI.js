@@ -1,4 +1,6 @@
 import axios from 'axios';
+const token = localStorage.getItem('token');
+
 
 // Axios 인스턴스 생성
 const AuthAPI = axios.create({
@@ -21,5 +23,11 @@ AuthAPI.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+// 로그아웃 
+export const logout = () => {
+  localStorage.clear();
+  window.location.href = '/'; 
+}
 
 export default AuthAPI;

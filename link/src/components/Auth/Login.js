@@ -12,6 +12,7 @@ import {
 } from "@mui/material/";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
+import {jwtDecode} from "jwt-decode"; // jwt-decode 라이브러리 추가
 
 const Login = () => {
   const theme = createTheme();
@@ -30,27 +31,47 @@ const Login = () => {
       formData.append("username", email);
       formData.append("password", password);
 
-      // API 호출
       const response = await axios.post(
         "http://localhost:8080/login",
-        formData
+        formData,
+        {withCredentials: true},
       );
-
+      const user = response.data;
+      const userId = response.data;
       if (response.data && response.data.token) {
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userId", userId);
+        // // JWT 디코딩 후 사용자 정보 저장
+        // const decodedUser = jwtDecode(response.data.token);
+        // localStorage.setItem("user", JSON.stringify(decodedUser));
+        
+        alert("로그인에 성공했습니다.");
+        return user;
       } else {
         throw new Error("token이 응답에 포함되어 있지 않습니다.");
       }
-    
-      alert("로그인에 성공했습니다.");
-      // 응답 데이터 반환
-      return response.data;
     } catch (error) {
       console.error("로그인 실패:", error.response || error.message);
       throw error;
     }
   };
+
+  // JWT 디코딩을 통해 사용자 정보 가져오기
+  const getUserFromToken = () => {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) return null;
+
+    try {
+      return jwtDecode(storedToken); // JWT 디코딩 후 반환
+    } catch (error) {
+      console.error("JWT 디코딩 실패:", error);
+      return null;
+    }
+  };
+
+  const userInfo = getUserFromToken();
+  console.log("토큰에서 가져온 사용자 정보:", userInfo);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,8 +83,8 @@ const Login = () => {
     try {
       const response = await login(loginData);
       localStorage.setItem("tokenType", response.tokenType);
-      localStorage.setItem("token", response.token);  // token을 로컬 스토리지에 저장
-      navigate("/main") // 리디렉션은 상태가 변경된 후에 이루어져야 함
+      localStorage.setItem("token", response.token); // token을 로컬 스토리지에 저장
+      navigate("/main");
     } catch (error) {
       console.log(error);
     }

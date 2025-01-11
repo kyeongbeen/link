@@ -28,7 +28,10 @@ import { useNavigate } from "react-router-dom";
 import Board from "./Board/Board";
 import TaskBoard from "./Task/TaskBoard";
 import Dashboard from "./Dashboard/Dashboard";
-import Timeline from "./Timeline/Timeline"
+import Timeline from "./Timeline/Timeline";
+import Project from "./Project/Project";
+import AuthAPI from "./Auth/AuthAPI";
+import {logout} from "./Auth/AuthAPI";
 
 // 내비게이션 메뉴 설정
 const NAVIGATION = [
@@ -66,7 +69,7 @@ function DemoPageContent({ pathname }) {
       {pathname === "/board" && <Board />}
       {pathname === "/taskboard" && <TaskBoard />}
       {pathname === "/timeline" && <Timeline />}
-      {pathname === "/project" && <Typography>Project</Typography>}
+      {pathname === "/project" && <Project />}
     </Box>
   );
 }
@@ -157,7 +160,8 @@ function SidebarFooterAccountPopover() {
       </MenuList>
       <Divider />
       <AccountPopoverFooter>
-        <SignOutButton />
+         {/* 로그아웃 버튼 */}
+         <SignOutButton onClick={logout} />
       </AccountPopoverFooter>
     </Stack>
   );
@@ -255,7 +259,7 @@ function CustomizedTabs({ setPathname, pathname }) {
     }
   };
 
-  // segment가 "project"일 때 탭 UI 숨기기
+  // segment가 project일 때 탭 UI 숨기기
   if (pathname.includes("project")) {
     return null;
   }

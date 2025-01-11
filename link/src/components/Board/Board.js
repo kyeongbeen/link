@@ -24,7 +24,7 @@ const Board = () => {
   const [openDialog, setOpenDialog] = useState(false); // 다이얼로그 열림 여부
   const [isEditing, setIsEditing] = useState(false); // 수정 중인지 여부
   const [editedPost, setEditedPost] = useState(null); // 수정 중인 게시글
-  const [replys, setReplys] = useState([]); // 댓글 목록
+  const [replies, setReplies] = useState([]); // 댓글 목록
   const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
   const [posts, setPosts] = useState([]); // 게시글 목록
   const [newPost, setNewPost] = useState(0); // 새로운 게시글 내용
@@ -97,7 +97,7 @@ const Board = () => {
   // 수정 저장
   const handleSaveEdit = async () => {
     try {
-      const response = await AuthAPI.post(
+      const response = await AuthAPI.patch(
         `http://localhost:8080/post/update/${selectedPost.postId}?title=${encodeURIComponent(editedPost.title)}&content=${encodeURIComponent(editedPost.content)}`
       );
       editedPost.date = formatDateToKrTime(editedPost.createdDate);
@@ -117,7 +117,7 @@ const Board = () => {
     setSelectedPost(post);
     if (reply) {
       const replyURL = `http://localhost:8080/reply/delete/${reply.replyId}`;
-      await AuthAPI.post(replyURL);
+      await AuthAPI.delete(replyURL);
     }
     const boardURL = `http://localhost:8080/post/delete/${post.postId}`;
     try {
@@ -149,7 +149,7 @@ const Board = () => {
         newReplyData
       );
       const newReply = response.data;
-      setReplys((prevReplies) => [...prevReplies, newReply]);
+      setReplies((prevReplies) => [...prevReplies, newReply]);
       await getReply();
       setNewReply({
         content: "",
@@ -164,7 +164,7 @@ const Board = () => {
   const getReply = async () => {
     try {
       const response = await AuthAPI.get("http://localhost:8080/reply/list");
-      setReplys(response.data);
+      setReplies(response.data);
     } catch (error) {
       console.error("댓글 목록을 가져오는 중 오류 발생: ", error);
     }
@@ -178,8 +178,8 @@ const Board = () => {
   const handleDeleteReply = async (reply) => {
     const URL = `http://localhost:8080/reply/delete/${reply.replyId}`;
     try {
-      const response = await AuthAPI.post(URL);
-      setReplys((prevReplies) =>
+      const response = await AuthAPI.delete(URL);
+      setReplies((prevReplies) =>
         prevReplies.filter(
           (existingReply) => existingReply.replyId !== reply.replyId
         )
@@ -308,7 +308,7 @@ const Board = () => {
                   onClick={() =>
                     handleDelete(
                       selectedPost,
-                      replys.find(
+                      replies.find(
                         (reply) => reply.postId === selectedPost?.postId // 댓글도 삭제되기 위하여 reply도 매개변수로 줌
                       )
                     )
@@ -323,7 +323,7 @@ const Board = () => {
           </DialogActions>
           {/* 댓글 영역 */}
           {!isEditing &&
-            replys
+            replies
               .filter((reply) => reply.postId === selectedPost?.postId)
               .map((reply, index) => (
                 <div

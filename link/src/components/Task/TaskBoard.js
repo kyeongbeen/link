@@ -18,7 +18,6 @@ import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import axios from "axios";
 import dayjs from "dayjs";
 import AuthAPI from "../Auth/AuthAPI";
 
@@ -32,7 +31,7 @@ const TaskBoard = () => {
   const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
-    assignedUser: 0,
+    assignedUser: "",
     title: "",
     content: "",
     taskPriority: "HIGH",
@@ -41,6 +40,22 @@ const TaskBoard = () => {
     deadline: null,
     date: null,
   }); // 새 작업 데이터, Default 값 설정
+  const { user, setUser } = useState({});
+  const TOKEN = localStorage.getItem("token");
+
+  // // 유저 정보 가져오기
+  // useEffect(() => {
+  //   if (TOKEN) {
+  //     fetchUser()
+  //       .then((response) => {
+  //         setUser(response);
+  //         console.log("유저 정보:", response);
+  //       })
+  //       .catch((error) => {
+  //         console.log(error);
+  //       });
+  //   }
+  // }, [TOKEN]);
 
   // 날짜 변환 함수
   const formatDateToKrTime = (date) => {
@@ -94,9 +109,7 @@ const TaskBoard = () => {
   useEffect(() => {
     const getTasks = async () => {
       try {
-        const response = await AuthAPI.get(
-          `http://localhost:8080/task/lists?projectId=${1}`
-        ); // 테스트를 위해 1로 설정
+        const response = await AuthAPI.get(`/task/lists?projectId=${1}`); // 테스트를 위해 1로 설정
         setTasks(response.data);
         console.log("API 응답 데이터:", response.data);
         setTasks((prevTasks) =>
@@ -148,7 +161,7 @@ const TaskBoard = () => {
   // 수정 저장
   const handleSaveEdit = async () => {
     try {
-      await AuthAPI.patch("http://localhost:8080/task/lists", editedTask, {
+      await AuthAPI.patch("/task/lists", editedTask, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -175,7 +188,7 @@ const TaskBoard = () => {
   // 작업 삭제
   const handleDelete = async (task) => {
     setSelectedTask(task);
-    const URL = `http://localhost:8080/task/lists/${task.taskId}`;
+    const URL = `/task/lists/${task.taskId}`;
     try {
       const response = await AuthAPI.delete(URL);
       const tasks = response.data;
@@ -201,17 +214,13 @@ const TaskBoard = () => {
       ...newTask,
       projectId: 1, // 실제 프로젝트 ID로 변경 (추후 수정, 지금은 테스트)
     };
-    console.log("보내질 데이터: ", newTaskData);
+    console.log("확인용 user 데이터: ", user);
     try {
-      const response = await AuthAPI.post(
-        "http://localhost:8080/task/new",
-        newTaskData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await AuthAPI.post("/task/new", newTaskData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       response.data.status = getStatus(response.data.status);
       response.data.taskPriority = getPriority(response.data.taskPriority);
       response.data.startDate = formatDateToKrTime(response.data.startDate);
