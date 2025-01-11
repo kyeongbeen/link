@@ -88,12 +88,23 @@ npm install
    - MainTemplate.js에서 메인 레이아웃을 구현
    - Dashboard.js는 대쉬보드 컴포넌트로 수정
 
-*. 작업 페이지 테스트 하실 떄
-  cors문제 나오시면 벡엔드 SecurityConfig에서 하단의 코드를 추가해주세요! 
-     ```
-      config.setAllowedOrigins(List.of("http://localhost:3000"));  // 프론트엔드 도메인 허용
-      config.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
-     ```
+*. 특이사항
+
+문제점:
+1. 현재 로그인한 유저의 userId를 가져 올 수 없어서, 프로젝트에서 userId가 필요한 부분에 계속 임의로 DB에 있는 userId를 임의로 넣어 주고 있습니다.
+
+2. 생성, 조회까지는 구현했지만 조회에서 임의로 userId를 넣어주었기 때문에 어떤 이메일로 로그인을 해도 계속 프로젝트가 동일하게 보입니다. (이 문제는 task, board, timeline에서도 똑같이 발생)
+
+3. 프로젝트 삭제 구현 중 삭제 로직을 구현해도, project의 projectId가 projectParticipants에서 외래키로 잡혀 있어 삭제가 안됩니다.
+
+추후 구현할 사항:
+1. 회원가입을 하면 로그인으로 넘어가지 않는 부분 (회원가입은 정상작동됨)
+
+2. 현재 userId를 가져 올 수 없어 토큰을 디코드하여 Email을 가져와 메인 페이지에서의 반영 예정
+
+4. 프로젝트 초대 구현 예정
+
+5. 게시판의 몇 메소드에서 401에러 뜨는 것 해결 예정
 
 
 
