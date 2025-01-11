@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 import {
   Button,
   CssBaseline,
@@ -13,19 +13,8 @@ import {
 } from "@mui/material/";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
-// 회원가입 요청
-export const signUp = async ({ email, userName, password }) => {
-  const data = { email, userName, password };
-  const response = await axios.post('http://localhost:8080/signup', data, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  return response.data;
-}
-
 // 회원가입 컴포넌트
-const Register = () => {
+export const Register = () => {
   const navigate = useNavigate();
   const theme = createTheme();
   const [signData, setSignData] = useState({
@@ -34,26 +23,45 @@ const Register = () => {
     userName: "",
   });
 
+  // 회원가입 요청
+  const signUp = async ({ email, userName, password }) => {
+    const data = { email, userName, password };
+    try {
+      const response = await axios.post("http://localhost:8080/signup", data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error during sign up:", error);
+      throw error;
+    }
+  };
+
   // 입력값 변경 시
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSignData({ ...signData, [name]: value });
   };
 
-  // 로그인 페이지로 이동
-  const handleLogin = () => {
-    navigate("/");
-  };
-
   // 폼 전송
   const handleSubmit = async (e) => {
-    signUp(signData)
-    .then((response) => {
-      window.location.href = `/`;
-    }).catch((error) => {
-        console.log(error);
-    });
-  }
+    e.preventDefault(); // 페이지 리로딩 방지
+    try {
+      await signUp(signData);
+      alert("회원가입이 완료되었습니다.");
+      navigate("/"); 
+    } catch (error) {
+      
+      console.error("Sign up failed", error);
+    }
+  };
+
+  // 로그인 페이지로 이동
+  const handleLogin = () => {
+    navigate("/"); 
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -153,7 +161,6 @@ const Register = () => {
                     mt: 3,
                     mb: 2,
                     fontWeight: "bold",
-
                     backgroundColor: "lightgray",
                     "&:hover": { backgroundColor: "gray" },
                   }}

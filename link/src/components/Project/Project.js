@@ -17,15 +17,18 @@ import dayjs from "dayjs";
 import AuthAPI from "../Auth/AuthAPI";
 
 const Project = () => {
-  const projectsPerPage = 5; 
+  const projectsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [projects, setProjects] = useState([]);
-  const [isEditing, setIsEditing] = useState(false); 
-  const [editedProject, setEditedProject] = useState(null); 
-  const [openDialog, setOpenDialog] = useState(false); 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedProject, setEditedProject] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
   const [newProject, setNewProject] = useState({
     projectName: "",
-  }); // 새 작업 데이터
+  });
+  const [inviteDialog, setInviteDialog] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
 
   const formatDateToKrTime = (date) => {
     return dayjs(date).format("YYYY-MM-DD");
@@ -82,9 +85,9 @@ const Project = () => {
 
   const handleSaveEdit = async () => {
     try {
-      await AuthAPI.patch(`/project/lists`, editedProject,
-        { headers: { "Content-Type": "application/json" } }
-      );
+      await AuthAPI.patch(`/project/lists`, editedProject, {
+        headers: { "Content-Type": "application/json" },
+      });
       setProjects((prevProjects) =>
         prevProjects.map((p) =>
           p.projectId === editedProject.projectId ? editedProject : p
@@ -98,9 +101,41 @@ const Project = () => {
     }
   };
 
+  const handleInvite = (projectId) => {
+    setSelectedProjectId(projectId);
+    setInviteDialog(true);
+  };
+
+  const handleSendInvite = async () => {
+    const inviteData = {
+      email: inviteEmail,
+      projectId: selectedProjectId,
+    };
+    console.log(inviteData);  // 테스트용
+    try {
+      await AuthAPI.post("project/participants/new", inviteData, {
+        headers: {
+          "Content-Type": "application/json",
+           Authorization: `Bearer ${localStorage.getItem("token")}`, // 인증 토큰
+        },
+      });
+      alert("초대가 성공적으로 전송되었습니다.");
+      setInviteDialog(false);
+      setInviteEmail("");
+    } catch (error) {
+      console.error("초대 전송 실패:", error);
+      alert("초대 전송 실패했습니다.");
+    }
+  };
+
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setIsEditing(false);
+  };
+
+  const handleCloseInviteDialog = () => {
+    setInviteDialog(false);
+    setInviteEmail("");
   };
 
   useEffect(() => {
@@ -157,8 +192,16 @@ const Project = () => {
                     variant="outlined"
                     color="error"
                     onClick={() => handleDelete(project)}
+                    style={{ marginRight: "10px" }}
                   >
                     삭제
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => handleInvite(project.projectId)}
+                  >
+                    팀원 추가
                   </Button>
                 </TableCell>
               </TableRow>
@@ -196,7 +239,7 @@ const Project = () => {
                     projectName: e.target.value,
                   })
             }
-            style={{marginTop: "20px" }}
+            style={{ marginTop: "20px" }}
           />
         </DialogContent>
         <DialogActions>
@@ -208,6 +251,32 @@ const Project = () => {
             color="primary"
           >
             {isEditing ? "저장" : "등록하기"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={inviteDialog}
+        onClose={handleCloseInviteDialog}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>팀원 추가</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="팀원 이메일"
+            fullWidth
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            style={{ marginTop: "20px" }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseInviteDialog} color="secondary">
+            닫기
+          </Button>
+          <Button onClick={handleSendInvite} color="primary">
+            초대하기
           </Button>
         </DialogActions>
       </Dialog>
