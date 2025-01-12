@@ -2,7 +2,7 @@ import React from "react";
 import DialogContent from "@mui/material/DialogContent";
 import { Typography, Box, Grid, Divider } from "@mui/material";
 
-const TaskDetail = ({ task }) => {
+const TaskDetail = ({ task, user }) => {
   // task가 null인 경우 렌더링하지 않음
   if (!task) {
     return null;
