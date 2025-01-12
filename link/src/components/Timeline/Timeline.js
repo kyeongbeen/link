@@ -8,6 +8,7 @@ import TimelineTaskDetail from "./TimelineTaskDetail";
 import { useProjectId } from "../Auth/ProjectIdContext";
 import { useUser } from "../Auth/UserContext"
 import axios from "axios";
+import dayjs from "dayjs";
 
 const Timeline = () => {
     const calendarRef = useRef(null);
@@ -17,15 +18,8 @@ const Timeline = () => {
     const [taskList, setTaskList] = useState([]);
     const { projectId } = useProjectId();
     const { user } = useUser();
-
-    // APi 호출
-    const getTaskList = ( projectId ) => {
-      const URL = "/task/lists?projectId=" + projectId;
-      const response = fetch(URL);
-      let tasks = response.json();
-      return tasks;
-    }
-
+    const [events, setEvents] = useState([]);
+    
     // 우선순위 한글로 변경
     const getPriority = (priority) => {
       switch(priority) {
@@ -65,12 +59,15 @@ const Timeline = () => {
     
     // 기간 설정
     const getPeriod = (startDate, endDate) => {
+      const startedDate = startDate.substring(0, 10);
+      const endedDate = endDate.substring(0, 10);
+      
       if (startDate == null) {
-        return endDate;
-      } else if (endDate == null) {
-        return startDate;
+        return endedDate;
+      } else if (endedDate == null) {
+        return startedDate;
       } else {
-        return startDate + " ~ " + endDate;
+        return startedDate + " ~ " + endedDate;
       }
     }
 
@@ -85,69 +82,58 @@ const Timeline = () => {
       setOpenDialog(true);
     }
 
-    const handleTaskUpdate = (updatedTask) => {
-      setSelectedTask(updatedTask);
-      setIsEditing(false);
+    const getNextDay = (date) => {
+      const temp = new Date(date);
+      temp.setDate(temp.getDate());
+      const year = temp.getFullYear();
+      const month = (temp.getMonth() + 1).toString().padStart(2, '0');
+      const getDate = temp.getDate().toString().padStart(2, '0');
+      console.log(`${year}-${month}-${getDate}`)
+      return `${year}-${month}-${getDate}`;
     }
 
-const getTasks = async (projectId) => {
-  try {
-    const response = await axios.get(
-      `http://localhost:8080/task/lists?projectId=${projectId}`,
-      {
-        headers: { Authorization: `Bearer ${user.token}` },
-      }
-    );
-    return response.data; // 데이터 반환
-  } catch (error) {
-    console.error("Error fetching tasks:", error);
-    return [];
-  }
-};
+    useEffect(() => {
+      const getTasks = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/task/lists?projectId=${projectId}`, {
+              headers: { Authorization: `Bearer ${user.token}` },
+          });
+          const taskEvents = response.data.map(task => ({
+            id: task.taskId,
+            title: task.title,
+            start: task.startDate.substring(0, 10),
+            end: getNextDay(task.deadline),
+          }));
+          setEvents(taskEvents);
+          setTaskList(response.data);
+          return response.data; // 데이터
+        } catch (error) {
+          console.error("Error fetching tasks:", error);
+          return [];
+        }
+      };
+      getTasks();
+    },[]);
 
-// 데이터 요청 및 이벤트 추가 함수
-const fetchAndSetTasks = async (calendar, projectId) => {
-  const tasks = await getTasks(projectId);
-  if (!Array.isArray(tasks)) {
-    console.error("Fetched tasks are not an array:", tasks);
-    return;
-  }
-  setTaskList(tasks); // taskList 업데이트
-
-  tasks.forEach((task) => {
-    const event = {
-      id: task.taskId,
-      title: task.title,
-      start: task.startDate || task.deadline,
-      end: task.deadline,
-    };
-    console.log(event);
-    calendar.addEvent(event);
-  });
-};
-
-useEffect(() => {
-  const calendar = new Calendar(calendarRef.current, {
-    plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
-    initialView: "dayGridMonth",
-    headerToolbar: {
-      left: "prev",
-      center: "title",
-      right: "next",
-    },
-    height: "auto",
-    locale: "ko",
-    eventClick: function (info) {
-      console.log("selected Event : " + info.event)
-      const taskId = info.event.id;
-      const taskIndex = taskList.findIndex((task) => task.taskId == taskId )
-      console.log("taskId : " + taskId);
-      console.log("arrIndex : " + taskIndex);
-      
-
-
-      if (taskIndex === -1) {console.error(`Task not found for event ID: ${taskId}`); return;}
-        const task = taskList[taskIndex];
+    useEffect(() => {
+      const calendar = new Calendar(calendarRef.current, {
+        plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
+        initialView: "dayGridMonth",
+        headerToolbar: {
+          left: "prev",
+          center: "title",
+          right: "next",
+        },
+        height: "auto",
+        locale: "ko",
+        events,
+        eventClick: function (info) {
+          const taskId = info.event.id;
+          const taskIndex = taskList.findIndex((task) => task.taskId == taskId )
+          
+          if (taskIndex === -1) {console.error(`Task not found for event ID: ${taskId}`); return;}
+          const task = taskList[taskIndex];
           setTask({
             id: task.taskId,
             assignedUser: task.assignedUser,
@@ -161,12 +147,11 @@ useEffect(() => {
             taskStatus: getStatus(task.status),
           });
           setOpenDialog(true);
-    },
-  });
+        },
+      });
+      calendar.render();
+    }, [taskList]);
 
-  fetchAndSetTasks(calendar, projectId); // 데이터 요청 및 이벤트 추가
-  calendar.render();
-}, []);
 
 
   return (

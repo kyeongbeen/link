@@ -57,7 +57,7 @@ const TaskDetail = ({ task }) => {
             <Typography variant="subtitle1" fontWeight="bold">
               담당자
             </Typography>
-            <Typography variant="body1">{task.author}</Typography>
+            <Typography variant="body1">{task.assignedUserName}</Typography>
           </Grid>
 
           <Divider sx={{ my: 2, width: "100%" }} />

@@ -52,9 +52,10 @@ const Board = () => {
   // 게시글 목록 불러오기
   useEffect(() => {
     const getPosts = async () => {
+      console.log(user.token);
       try {
-        const response = await AuthAPI.get(
-          "/post/list",
+        const response = await axios.get(
+          "http://localhost:8080/post/list",
           { headers: { Authorization: `Bearer ${user.token}` } }
         );
 
@@ -68,7 +69,7 @@ const Board = () => {
           ...post,
           date: formatDateToKrTime(post.createdDate),
         }));
-
+        console.log(response.data);
         setPosts(formattedPosts); // 필터링된 게시글 설정
         console.log("게시글 목록: ", formattedPosts);
       } catch (error) {
@@ -94,6 +95,7 @@ const Board = () => {
   // 게시글 클릭 시 다이얼로그 열기
   const handlePostClick = (post) => {
     setSelectedPost(post);
+    // console.log(post.authorName);
     setEditedPost(post);
     setOpenDialog(true);
   };
@@ -228,6 +230,7 @@ const Board = () => {
     const newPostData = {
       ...newPost,
       projectId: projectId,
+      authorId: user.userId,
     };
     console.log("POST로 보내질 데이터: ", newPostData);
     try {
@@ -288,7 +291,7 @@ const Board = () => {
                 style={{ cursor: "pointer" }}
               >
                 <TableCell align="center">{post.title}</TableCell>
-                <TableCell align="center">{user.userName}</TableCell>
+                <TableCell align="center">{post.authorName}</TableCell>
                 <TableCell align="center">{post.date}</TableCell>
               </TableRow>
             ))}

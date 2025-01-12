@@ -24,6 +24,7 @@ import { useProjectId } from "../Auth/ProjectIdContext";
 import { useUser } from "../Auth/UserContext"
 
 const TaskBoard = () => {
+  const { user } = useUser();
   const tasksPerPage = 5; // 작업 페이지당 작업 수
   const [currentPage, setCurrentPage] = useState(1); // 현재 작업 페이지
   const [selectedTask, setSelectedTask] = useState(null); // 선택된 작업
@@ -33,7 +34,8 @@ const TaskBoard = () => {
   const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
-    assignedUser: "",
+    assignedUser: user.userId,
+    assignedUserName: user.userName,
     title: "",
     content: "",
     taskPriority: "HIGH",
@@ -45,21 +47,6 @@ const TaskBoard = () => {
   // const { user, setUser } = useState({});
   const TOKEN = localStorage.getItem("token");
   const projectId = useProjectId();
-  const { user } = useUser();
-
-  // // 유저 정보 가져오기
-  // useEffect(() => {
-  //   if (TOKEN) {
-  //     fetchUser()
-  //       .then((response) => {
-  //         setUser(response);
-  //         console.log("유저 정보:", response);
-  //       })
-  //       .catch((error) => {
-  //         console.log(error);
-  //       });
-  //   }
-  // }, [TOKEN]);
 
   // 날짜 변환 함수
   const formatDateToKrTime = (date) => {
@@ -242,6 +229,7 @@ const TaskBoard = () => {
       setTasks((prevTasks) => [response.data, ...prevTasks]);
       setOpenCreateDialog(false);
       alert("새 작업이 생성되었습니다.");
+      console.log(newTaskData);
     } catch (error) {
       console.error("오류 :", error);
       if (error.response) {
@@ -285,7 +273,7 @@ const TaskBoard = () => {
               >
                 <TableCell align="center">{task.status}</TableCell>
                 <TableCell align="center">{task.title}</TableCell>
-                <TableCell align="center">{task.assignedUser}</TableCell>
+                <TableCell align="center">{task.assignedUserName}</TableCell>
                 <TableCell align="center">{task.taskPriority}</TableCell>
                 <TableCell align="right">{task.startDate}</TableCell>
                 <TableCell align="center">~</TableCell>

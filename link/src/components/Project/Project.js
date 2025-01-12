@@ -107,6 +107,7 @@ const Project = () => {
         prevProjects.filter((p) => p.projectId !== project.projectId)
       );
       alert("프로젝트가 성공적으로 삭제되었습니다.");
+      console.log("프로젝트 삭제 후 토큰 : " + user.token)
     } catch (error) {
       alert("프로젝트 삭제에 실패했습니다.");
       console.error("프로젝트 삭제 중 오류 발생:", error);

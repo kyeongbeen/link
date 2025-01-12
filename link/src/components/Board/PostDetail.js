@@ -7,7 +7,7 @@ const PostDetail = ({ post, user }) => {
   if (!post) {
     return null;
   }
-
+  console.log(post);
   return (
     <DialogContent>
       <Box>
@@ -23,7 +23,7 @@ const PostDetail = ({ post, user }) => {
           작성자
         </Typography>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          {user.userName }
+          {post.authorName}
         </Typography>
 
         <Divider sx={{ my: 2 }} />

@@ -87,10 +87,10 @@ const Dashboard = () => {
         }}
       >
         {[
-          { title: "TOTAL", count: taskData.totalTasks, color: "primary" },
-          { title: "FINISH", count: taskData.finishedTasks, color: "success.main" },
-          { title: "ONGOING", count: taskData.ongoingTasks, color: "warning.main" },
-          { title: "INCOMPLETE", count: taskData.inCompletedTasks, color: "error.main" },
+          { title: "총작업", count: taskData.totalTasks, color: "primary" },
+          { title: "완료", count: taskData.finishedTasks, color: "success.main" },
+          { title: "진행중", count: taskData.ongoingTasks, color: "warning.main" },
+          { title: "미완료", count: taskData.inCompletedTasks, color: "error.main" },
         ].map((task, index) => (
           <Grid2 
             item

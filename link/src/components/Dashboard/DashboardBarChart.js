@@ -8,6 +8,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  plugins,
 } from 'chart.js';
 
 // Chart.js 필수 설정 등록
@@ -23,10 +24,10 @@ ChartJS.register(
 const DashboardBarChart = ({ data }) => {
   // 차트 데이터 정의
   const chartData = {
-    labels: ["TOTAL", "FINISH", "ONGOING", "INCOMPLETE"],
+    labels: ["총작업", "완료", "진행중", "미완료"],
     datasets: [
       {
-        label: "Tasks",
+        // label: "총작업",
         data: [
           data.totalTasks,
           data.finishedTasks,
@@ -49,7 +50,7 @@ const DashboardBarChart = ({ data }) => {
     maintainAspectRatio: false, // 차트의 비율을 부모 요소에 맞춤
     plugins: {
       legend: {
-        display: true, // 범례 표시 여부
+        display: false, // 범례 표시 여부
         position: "top", // 범례 위치
       },
     },
