@@ -6,22 +6,12 @@ const UserContext = createContext();
 
 // UserContext provider 컴포넌트
 export const UserProvider = ({ children }) => {
-  const [userName, setUserName] = useState(null);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setUserName(decoded.userName); // 토큰에서 userName 추출
-      } catch (err) {
-        console.error('토큰 디코딩 실패:', err);
-      }
-    }
-  }, []); // 처음 렌더링 시 한 번만 실행
+  const [user, setUser] = useState(null);
+  const login = (userData) => setUser(userData);
+  const logout = () => setUser(null);
 
   return (
-    <UserContext.Provider value={{ userName }}>
+    <UserContext.Provider value={{ user, login, logout }}>
       {children}
     </UserContext.Provider>
   );

@@ -7,6 +7,7 @@ import { Dialog, DialogActions, Button} from "@mui/material";
 import TimelineTaskDetail from "./TimelineTaskDetail";
 import axios from 'axios';
 import AuthAPI from "../Auth/AuthAPI";
+import { useUser } from "../Auth/UserContext"
 
 const Timeline = () => {
     const calendarRef = useRef(null);
@@ -14,7 +15,7 @@ const Timeline = () => {
     const [selectedTask, setSelectedTask] = useState(null); // 선택된 작업
     const [isEditing, setIsEditing] = useState(false); // 수정중인지?
     const [taskList, setTaskList] = useState([]);
-    
+    const { user } = useUser();
 
     // APi 호출
     const getTaskList = ( projectId ) => {
@@ -89,13 +90,11 @@ const Timeline = () => {
     }
 
 const getTasks = async (projectId) => {
-  const token =
-    "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6IjFAbGluay5jb20iLCJyb2xlIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzM2NDg2NTkwLCJleHAiOjE3MzY0OTAxOTB9.2qSuCPFeykEWzoa_-GTUXOi5aK6RINDrsx3_hoxpaug";
   try {
-    const response = await AuthAPI.get(
+    const response = await axios.get(
       `http://localhost:8080/task/lists?projectId=${projectId}`,
       {
-        headers: { Authorization: token },
+        headers: { Authorization: `Bearer ${user.token}` },
       }
     );
     return response.data; // 데이터 반환
@@ -105,8 +104,28 @@ const getTasks = async (projectId) => {
   }
 };
 
+
+// form-data를 사용하기 위해서 fetch 를 사용해서 API 호출
+const postLogin = async (email, password) => {
+  const formData = new FormData();
+  formData.append('username', email);
+  formData.append('password', password);
+  const URL = "http://localhost:8080/login";
+  fetch(URL, {
+    method: 'POST',
+    cache: 'no-cache',
+    body: formData
+  })
+  .then((response) => response.json())
+  .then((data) => {
+    console.log(data);
+    return data;
+  });
+}
+
 // 데이터 요청 및 이벤트 추가 함수
 const fetchAndSetTasks = async (calendar, projectId) => {
+  const loginInfo = await postLogin('1@link.com', '1');
   const tasks = await getTasks(projectId);
   if (!Array.isArray(tasks)) {
     console.error("Fetched tasks are not an array:", tasks);
@@ -123,6 +142,8 @@ const fetchAndSetTasks = async (calendar, projectId) => {
     };
     calendar.addEvent(event);
   });
+
+  console.log(loginInfo);
 };
 
 useEffect(() => {
@@ -139,7 +160,9 @@ useEffect(() => {
     eventClick: function (info) {
       const taskId = info.event.id;
       const taskIndex = taskList.findIndex((task) => { return task.taskId == taskId })
-      console.log(typeof taskIndex);
+      console.log(taskId);
+      console.log(taskIndex);
+      
 
 
       if (taskIndex === -1) {console.error(`Task not found for event ID: ${taskId}`); return;}

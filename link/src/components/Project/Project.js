@@ -15,6 +15,8 @@ import TextField from "@mui/material/TextField";
 import { DialogContent } from "@mui/material";
 import dayjs from "dayjs";
 import AuthAPI from "../Auth/AuthAPI";
+import { useUser } from "../Auth/UserContext"
+import axios from "axios";
 
 const Project = () => {
   const projectsPerPage = 5;
@@ -31,7 +33,7 @@ const Project = () => {
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [participantsDialog, setParticipantsDialog] = useState(false);
   const [projectParticipants, setProjectParticipants] = useState([]);
-
+  const { user } = useUser();
   // 날짜 형식 변환
   const formatDateToKrTime = (date) => {
     return dayjs(date).format("YYYY-MM-DD");
@@ -52,13 +54,15 @@ const Project = () => {
   // 프로젝트 추가하기
   const handleCreateProject = async () => {
     const newProjectData = {
-      projectLeaderId: 1, // 임의로 값을 줘야 함, userId를 못 받아 옴
+      projectLeaderId: user.userId, // 임의로 값을 줘야 함, userId를 못 받아 옴
       projectName: newProject.projectName,
     };
     try {
-      const response = await AuthAPI.post("/project/new", newProjectData, {
+      console.log(user.token);
+      const response = await axios.post("http://localhost:8080/project/new", newProjectData, {
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`
         },
       });
       response.data.createDate = formatDateToKrTime(response.data.createDate);
@@ -82,8 +86,11 @@ const Project = () => {
   // 프로젝트 삭제하기 (프로젝트 ID가 외래키로 잡혀 있어서 삭제가 안됨)
   const handleDelete = async (project) => {
     const URL = `/project/lists/${project.projectId}`;
+    console.log(user.token);
     try {
-      await AuthAPI.delete(URL);
+      await AuthAPI.delete(URL, {
+        headers: {Authorization: `Bearer ${user.token}`},
+        });
       setProjects((prevProjects) =>
         prevProjects.filter((p) => p.projectId !== project.projectId)
       );
@@ -105,7 +112,8 @@ const Project = () => {
     try {
       await AuthAPI.patch("/project/lists", editedProject, {
         headers: { 
-          "Content-Type": "application/json" 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`
         },
       });
       editedProject.createDate = formatDateToKrTime(editedProject.createDate);
@@ -141,7 +149,7 @@ const Project = () => {
       await AuthAPI.post("project/participants/new", inviteData, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // 인증 토큰
+          Authorization: `Bearer ${user.token}`, // 인증 토큰
         },
       });
       alert("초대가 성공적으로 전송되었습니다.");
@@ -169,7 +177,10 @@ const Project = () => {
   useEffect(() => {
     const getProjects = async () => {
       try {
-        const response = await AuthAPI.get(`/project/lists?userId=${1}`);
+        const response = await axios.get(`http://localhost:8080/project/lists?userId=${user.userId}`, {
+          headers: {Authorization: `Bearer ${user.token}`}
+          }
+        );
         setProjects(response.data);
       } catch (error) {
         console.error("프로젝트 목록을 가져오는 중 오류 발생:", error);
@@ -181,7 +192,9 @@ const Project = () => {
   // 프로젝트에 소속된 유저 리스트 가져오기
   const getProjectParticipants = async (projectId) => {
     try {
-      const response = await AuthAPI.get(`/user/lists?projectId=${projectId}`);
+      const response = await AuthAPI.get(`/user/lists?projectId=${projectId}`, {
+        headers: {Authorization: `Bearer ${user.token}`}
+        });
       // console.log(response.data);  // 테스트용
       return response.data;
     } catch (error) {
