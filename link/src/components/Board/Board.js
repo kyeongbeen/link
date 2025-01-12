@@ -157,7 +157,7 @@ const Board = () => {
 
   // 댓글 추가
   const handleAddReply = async () => {
-    console.log("유저 이름", user);
+    console.log("유저 이름", user.userName);
     const newReplyData = {
       projectId: projectId, 
       authorName: user.userName,
@@ -167,6 +167,7 @@ const Board = () => {
     };
     console.log("댓글 추가 데이터:", newReplyData);
     try {
+      console.log("board.js token : " + user.token);
       const response = await AuthAPI.post(
         `http://localhost:8080/reply/create/${selectedPost.postId}`,
         newReplyData, {

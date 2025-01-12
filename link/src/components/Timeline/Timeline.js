@@ -7,7 +7,7 @@ import { Dialog, DialogActions, Button} from "@mui/material";
 import TimelineTaskDetail from "./TimelineTaskDetail";
 import { useProjectId } from "../Auth/ProjectIdContext";
 import { useUser } from "../Auth/UserContext"
-import axios from 'axios';
+import axios from "axios";
 
 const Timeline = () => {
     const calendarRef = useRef(null);
@@ -91,7 +91,6 @@ const Timeline = () => {
     }
 
 const getTasks = async (projectId) => {
-  console.log(projectId);
   try {
     const response = await axios.get(
       `http://localhost:8080/task/lists?projectId=${projectId}`,
@@ -106,28 +105,8 @@ const getTasks = async (projectId) => {
   }
 };
 
-
-// form-data를 사용하기 위해서 fetch 를 사용해서 API 호출
-const postLogin = async (email, password) => {
-  const formData = new FormData();
-  formData.append('username', email);
-  formData.append('password', password);
-  const URL = "http://localhost:8080/login";
-  fetch(URL, {
-    method: 'POST',
-    cache: 'no-cache',
-    body: formData
-  })
-  .then((response) => response.json())
-  .then((data) => {
-    console.log(data);
-    return data;
-  });
-}
-
 // 데이터 요청 및 이벤트 추가 함수
 const fetchAndSetTasks = async (calendar, projectId) => {
-  const loginInfo = await postLogin('1@link.com', '1');
   const tasks = await getTasks(projectId);
   if (!Array.isArray(tasks)) {
     console.error("Fetched tasks are not an array:", tasks);
@@ -142,10 +121,9 @@ const fetchAndSetTasks = async (calendar, projectId) => {
       start: task.startDate || task.deadline,
       end: task.deadline,
     };
+    console.log(event);
     calendar.addEvent(event);
   });
-
-  console.log(loginInfo);
 };
 
 useEffect(() => {
@@ -160,10 +138,11 @@ useEffect(() => {
     height: "auto",
     locale: "ko",
     eventClick: function (info) {
+      console.log("selected Event : " + info.event)
       const taskId = info.event.id;
-      const taskIndex = taskList.findIndex((task) => { return task.taskId == taskId })
-      console.log(taskId);
-      console.log(taskIndex);
+      const taskIndex = taskList.findIndex((task) => task.taskId == taskId )
+      console.log("taskId : " + taskId);
+      console.log("arrIndex : " + taskIndex);
       
 
 

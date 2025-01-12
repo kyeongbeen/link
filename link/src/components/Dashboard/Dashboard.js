@@ -9,12 +9,14 @@ import DashboardBarChart from './DashboardBarChart';
 import AuthAPI from '../Auth/AuthAPI';
 import { useProjectId } from '../Auth/ProjectIdContext';
 import axios from 'axios';
+import { useUser } from '../Auth/UserContext'
 
 const Dashboard = () => {
   // 상태 정의
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { projectId } = useProjectId();
+  const { user } = useUser();
 
   // 페이지 콘텐츠 컴포넌트 (컨텐츠 내용물)
   const [taskData, setTaskData] = useState ({
@@ -28,17 +30,14 @@ const Dashboard = () => {
 
   // API 호출
   useEffect(() => {
-    const token =
-    "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6IjFAbGluay5jb20iLCJyb2xlIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzM2NjczMjgzLCJleHAiOjE3MzY3NTk2ODN9.TSeemNbA8yYU5CNRYVojBAg1giMA88BZuipvlcwtJdE";
     const getDashboard = async () => {
       try {
-        console.log(projectId);
+        console.log("projectId : " + projectId);
+        console.log(user.token);
         // API로부터 데이터 가져오기
-        const response = await axios.get(`http://localhost:8080/dashboard/status?projectId=${projectId}`,
-          {
-            headers:{Authorization: token}
-          }
-        );
+        const response = await axios.get(`http://localhost:8080/dashboard/status?projectId=${projectId}`, {
+          headers:{Authorization: `Bearer ${user.token}`}
+        });
         
         
         // 작업 상태별 개수 계산

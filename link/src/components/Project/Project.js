@@ -63,6 +63,7 @@ const Project = () => {
 
   // 프로젝트 추가하기
   const handleCreateProject = async () => {
+    console.log(user.userId);
     const newProjectData = {
       projectLeaderId: user.userId, // 임의로 값을 줘야 함, userId를 못 받아 옴
       projectName: newProject.projectName,
@@ -188,11 +189,13 @@ const Project = () => {
   useEffect(() => {
     const getProjects = async () => {
       try {
+        console.log("userId : " + user.userId);
         const response = await axios.get(`http://localhost:8080/project/lists?userId=${user.userId}`, {
           headers: {Authorization: `Bearer ${user.token}`}
           }
         );
         setProjects(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error("프로젝트 목록을 가져오는 중 오류 발생:", error);
       }
