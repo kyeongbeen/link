@@ -97,7 +97,7 @@ npm install
 
 3. 프로젝트 삭제 구현 중 삭제 로직을 구현해도, project의 projectId가 projectParticipants에서 외래키로 잡혀 있어 삭제가 안됩니다.
 
-4. 그래서 지금 project 읽기 등 userId가 필요한 부분에서는 전부 1로 임시 값을 넣어놨습니다. (유저를 만들면 처음 userId는 1이기 때문)
+ - **그래서 지금 project 읽기 등 userId가 필요한 부분에서는 전부 1로 임시 값을 넣어놨습니다. (유저를 만들면 처음 userId는 1이기 때문)**
 
 추후 구현할 사항:
 
