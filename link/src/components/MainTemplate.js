@@ -104,7 +104,7 @@ AccountSidebarPreview.propTypes = {
 const accounts = [
   {
     id: 1,
-    name: useUser,
+    name: "",
     image: "https://avatars.githubusercontent.com/u/187992632?v=4",
     projects: [{ id: 3, title: "Project X" }],
   },
@@ -171,6 +171,7 @@ const createPreviewComponent = (mini) => {
 };
 
 // 사이드바 계정 컴포넌트
+/** 
 function SidebarFooterAccount({ mini }) {
   const PreviewComponent = React.useMemo(
     () => createPreviewComponent(mini),
@@ -193,7 +194,7 @@ function SidebarFooterAccount({ mini }) {
   );
 }
 
-SidebarFooterAccount.propTypes = { mini: PropTypes.bool.isRequired };
+SidebarFooterAccount.propTypes = { mini: PropTypes.bool.isRequired };*/
 
 // 세션 데이터 설정 (임시)
 const demoSession = {
@@ -310,7 +311,7 @@ function DashboardLayoutAccountSidebar(props) {
     >
       <DashboardLayout
         slots={{
-          sidebarFooter: SidebarFooterAccount,
+          
         }}
       >
         <Box sx>

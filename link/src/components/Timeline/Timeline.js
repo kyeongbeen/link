@@ -5,9 +5,9 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import listPlugin from '@fullcalendar/list'
 import { Dialog, DialogActions, Button} from "@mui/material";
 import TimelineTaskDetail from "./TimelineTaskDetail";
-import AuthAPI from "../Auth/AuthAPI";
 import { useProjectId } from "../Auth/ProjectIdContext";
 import { useUser } from "../Auth/UserContext"
+import axios from 'axios';
 
 const Timeline = () => {
     const calendarRef = useRef(null);

@@ -2,7 +2,7 @@ import React from "react";
 import DialogContent from "@mui/material/DialogContent";
 import { Typography, Box, Divider } from "@mui/material";
 
-const PostDetail = ({ post }) => {
+const PostDetail = ({ post, user }) => {
   // post가 null인 경우 렌더링하지 않음
   if (!post) {
     return null;
@@ -23,7 +23,7 @@ const PostDetail = ({ post }) => {
           작성자
         </Typography>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          {post.authorId}
+          {user.userName }
         </Typography>
 
         <Divider sx={{ my: 2 }} />

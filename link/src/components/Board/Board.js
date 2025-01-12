@@ -33,7 +33,6 @@ const Board = () => {
   const [newPost, setNewPost] = useState(0); // 새로운 게시글 내용
   const [newReply, setNewReply] = useState(0); // 새로운 댓글 내용
   const { projectId } = useProjectId(); // 선택된 프로젝트 ID
-  const { userName } = useUser(); // 현재 사용자 이메일
   const { user } = useUser();
 
 
@@ -55,22 +54,30 @@ const Board = () => {
     const getPosts = async () => {
       try {
         const response = await AuthAPI.get(
-          "/post/list"
-          , {headers: { Authorization: `Bearer ${user.token}` }}
+          "/post/list",
+          { headers: { Authorization: `Bearer ${user.token}` } }
         );
-        setPosts(response.data);
-        setPosts((prevPosts) =>
-          prevPosts.map((post) => ({
-            ...post,
-            date: formatDateToKrTime(post.createdDate),
-          }))
+
+        // projectId 필터링
+        const filteredPosts = response.data.filter(
+          (post) => post.projectId === projectId // projectId와 일치하는 항목만 필터링
         );
+
+        // 날짜 포맷팅
+        const formattedPosts = filteredPosts.map((post) => ({
+          ...post,
+          date: formatDateToKrTime(post.createdDate),
+        }));
+
+        setPosts(formattedPosts); // 필터링된 게시글 설정
+        console.log("게시글 목록: ", formattedPosts);
       } catch (error) {
         console.error("게시글 목록을 가져오는 중 오류 발생: ", error);
       }
     };
     getPosts();
-  }, []);
+  }, [projectId, posts]); // projectId가 변경될 때도 useEffect 재실행
+
 
   // 전체 페이지 수 계산
   const totalPage = Math.ceil(posts.length / postPerPage);
@@ -150,10 +157,10 @@ const Board = () => {
 
   // 댓글 추가
   const handleAddReply = async () => {
-    console.log("유저 이름", userName);
+    console.log("유저 이름", user);
     const newReplyData = {
       projectId: projectId, 
-      authorName: userName,
+      authorName: user.userName,
       content: newReply.content,
       createdDate: new Date(),
       postId: selectedPost.postId,
@@ -219,6 +226,7 @@ const Board = () => {
   const handleCreatePost = async () => {
     const newPostData = {
       ...newPost,
+      projectId: projectId,
     };
     console.log("POST로 보내질 데이터: ", newPostData);
     try {
@@ -279,7 +287,7 @@ const Board = () => {
                 style={{ cursor: "pointer" }}
               >
                 <TableCell align="center">{post.title}</TableCell>
-                <TableCell align="center">{post.authorId}</TableCell>
+                <TableCell align="center">{user.userName}</TableCell>
                 <TableCell align="center">{post.date}</TableCell>
               </TableRow>
             ))}
@@ -323,7 +331,7 @@ const Board = () => {
               }
             />
           ) : (
-            <PostDetail post={selectedPost} />
+            <PostDetail post={selectedPost} user={user} />
           )}
           <DialogActions>
             {isEditing ? (

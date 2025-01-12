@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import DashboardBarChart from './DashboardBarChart';
 import AuthAPI from '../Auth/AuthAPI';
 import { useProjectId } from '../Auth/ProjectIdContext';
+import axios from 'axios';
 
 const Dashboard = () => {
   // 상태 정의
@@ -33,7 +34,7 @@ const Dashboard = () => {
       try {
         console.log(projectId);
         // API로부터 데이터 가져오기
-        const response = await axios.get(`http://localhost:8080/dashboard/status?projectId=${1}`,
+        const response = await axios.get(`http://localhost:8080/dashboard/status?projectId=${projectId}`,
           {
             headers:{Authorization: token}
           }
