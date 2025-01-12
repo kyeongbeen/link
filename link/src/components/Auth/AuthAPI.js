@@ -1,4 +1,6 @@
 import axios from 'axios';
+import {useUser} from "./UserContext"
+
 const token = localStorage.getItem('token');
 
 
@@ -6,7 +8,7 @@ const token = localStorage.getItem('token');
 const AuthAPI = axios.create({
   baseURL: 'http://localhost:8080',  // API 서버의 기본 URL
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   },
 });
 

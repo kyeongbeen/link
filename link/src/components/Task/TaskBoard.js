@@ -21,6 +21,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import AuthAPI from "../Auth/AuthAPI";
 import { useProjectId } from "../Auth/ProjectIdContext";
+import { useUser } from "../Auth/UserContext"
 
 const TaskBoard = () => {
   const tasksPerPage = 5; // 작업 페이지당 작업 수
@@ -41,9 +42,10 @@ const TaskBoard = () => {
     deadline: null,
     date: null,
   }); // 새 작업 데이터, Default 값 설정
-  const { user, setUser } = useState({});
+  // const { user, setUser } = useState({});
   const TOKEN = localStorage.getItem("token");
   const projectId = useProjectId();
+  const { user } = useUser();
 
   // // 유저 정보 가져오기
   // useEffect(() => {
@@ -112,9 +114,12 @@ const TaskBoard = () => {
     const getTasks = async () => {
       try {
         console.log("프로젝트 아이디:", projectId); 
-        const response = await AuthAPI.get(`/task/lists?projectId=${projectId.projectId}`); // userId를 불러오지 못하여 1로 설정 
+        const response = await AuthAPI.get(`/task/lists?projectId=${projectId.projectId}`,
+          {
+            headers:{Authorization: `Bearer ${user.token}`}
+          }
+        ); // userId를 불러오지 못하여 1로 설정 
         setTasks(response.data);
-        console.log("API 응답 데이터:", response.data);
         setTasks((prevTasks) =>
           prevTasks.map((task) => ({
             ...task,
@@ -167,6 +172,7 @@ const TaskBoard = () => {
       await AuthAPI.patch("/task/lists", editedTask, {
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`
         },
       });
       editedTask.status = getStatus(editedTask.status);
@@ -183,7 +189,6 @@ const TaskBoard = () => {
       handleCloseDialog();
     } catch (error) {
       console.error("오류: ", error);
-      console.log("API 응답 데이터:", editedTask);
       alert("작업이 수행되지 못했습니다.");
     }
   };
@@ -193,7 +198,11 @@ const TaskBoard = () => {
     setSelectedTask(task);
     const URL = `/task/lists/${task.taskId}`;
     try {
-      const response = await AuthAPI.delete(URL);
+      const response = await AuthAPI.delete(URL, {
+        headers: {
+          Authorization: `Bearer ${user.token}`
+        }
+      });
       const tasks = response.data;
 
       setTasks((prevTasks) =>
@@ -222,6 +231,7 @@ const TaskBoard = () => {
       const response = await AuthAPI.post("/task/new", newTaskData, {
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`
         },
       });
       response.data.status = getStatus(response.data.status);

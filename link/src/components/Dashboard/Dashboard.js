@@ -27,11 +27,17 @@ const Dashboard = () => {
 
   // API 호출
   useEffect(() => {
+    const token =
+    "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6IjFAbGluay5jb20iLCJyb2xlIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzM2NjczMjgzLCJleHAiOjE3MzY3NTk2ODN9.TSeemNbA8yYU5CNRYVojBAg1giMA88BZuipvlcwtJdE";
     const getDashboard = async () => {
       try {
         console.log(projectId);
         // API로부터 데이터 가져오기
-        const response = await AuthAPI.get(`/dashboard/status?projectId=${projectId}`);
+        const response = await axios.get(`http://localhost:8080/dashboard/status?projectId=${1}`,
+          {
+            headers:{Authorization: token}
+          }
+        );
         
         
         // 작업 상태별 개수 계산

@@ -11,8 +11,8 @@ import {
   Container,
 } from "@mui/material/";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import axios from "axios";
-import {jwtDecode} from "jwt-decode"; // jwt-decode 라이브러리 추가
+import { useUser } from "./UserContext"
+
 
 const Login = () => {
   const theme = createTheme();
@@ -21,73 +21,72 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  // UserContext 사용
+  const { login } = useUser();
 
-  // 로그인 요청
-  const login = async ({ email, password }) => {
-    try {
-      // 폼 데이터 형식으로 변환
-      const formData = new FormData();
-      formData.append("username", email);
-      formData.append("password", password);
 
-      const response = await axios.post(
-        "http://localhost:8080/login",
-        formData,
-        {withCredentials: true},
-      );
-      const user = response.data;
-      const userId = response.data;
-      if (response.data && response.data.token) {
-        setToken(response.data.token);
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("userId", userId);
-        // // JWT 디코딩 후 사용자 정보 저장
-        // const decodedUser = jwtDecode(response.data.token);
-        // localStorage.setItem("user", JSON.stringify(decodedUser));
+//       const response = await axios.post(
+//         "http://localhost:8080/login",
+//         formData,
+//         {withCredentials: true},
+//       );
+//       const user = response.data;
+//       const userId = response.data;
+//       if (response.data && response.data.token) {
+//         setToken(response.data.token);
+//         localStorage.setItem("token", response.data.token);
+//         localStorage.setItem("userId", userId);
+//         // // JWT 디코딩 후 사용자 정보 저장
+//         // const decodedUser = jwtDecode(response.data.token);
+//         // localStorage.setItem("user", JSON.stringify(decodedUser));
         
-        alert("연결고리에 오신 것을 환영합니다.");
-        return user;
-      } else {
-        throw new Error("token이 응답에 포함되어 있지 않습니다.");
-      }
-    } catch (error) {
-      alert("아이디 또는 비밀번호가 잘못 되었습니다.");
-      console.error("로그인 실패:", error.response || error.message);
-      throw error;
+//         alert("연결고리에 오신 것을 환영합니다.");
+//         return user;
+//       } else {
+//         throw new Error("token이 응답에 포함되어 있지 않습니다.");
+//       }
+//     } catch (error) {
+//       alert("아이디 또는 비밀번호가 잘못 되었습니다.");
+//       console.error("로그인 실패:", error.response || error.message);
+//       throw error;
+
+  // 로그인 요청 및 response return
+  const postLogin = async (loginData) => {
+    const formData = new FormData();
+    formData.append("username", loginData.email);
+    formData.append("password", loginData.password);
+    const URL = "http://localhost:8080/login";
+    const response = await fetch(URL, {
+        method: 'POST',
+        cache: 'no-cache',
+        body: formData
+      });
+    if (!response.ok) {
+      throw new Error("아이디 또는 비밀번호를 다시 입력해주세요!");
+
     }
-  };
 
-  // JWT 디코딩을 통해 사용자 정보 가져오기
-  const getUserFromToken = () => {
-    const storedToken = localStorage.getItem("token");
-    if (!storedToken) return null;
+    // 로그인 정보 return
+    return response.json();
+  }
 
-    try {
-      return jwtDecode(storedToken); // JWT 디코딩 후 반환
-    } catch (error) {
-      console.error("JWT 디코딩 실패:", error);
-      return null;
-    }
-  };
-
-  const userInfo = getUserFromToken();
-  console.log("토큰에서 가져온 사용자 정보:", userInfo);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setLoginData({ ...loginData, [name]: value });
   };
 
+
+  // 로그인 버튼 클릭시 실행되는 event
+  // 로그인 성공, 실패를 알려주는 부분
   const handleSubmit = async (e) => {
     e.preventDefault(); // 기본 이벤트 방지
     try {
-      const response = await login(loginData);
-      localStorage.setItem("tokenType", response.tokenType);
-      localStorage.setItem("token", response.token); // token을 로컬 스토리지에 저장
+      const response = await postLogin(loginData);
+      login(response);
       navigate("/main");
     } catch (error) {
-      console.log(error);
+      alert(error);
     }
   };
 

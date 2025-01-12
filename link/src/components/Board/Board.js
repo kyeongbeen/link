@@ -18,6 +18,7 @@ import dayjs from "dayjs";
 import AuthAPI from "../Auth/AuthAPI";
 import { useProjectId } from "../Auth/ProjectIdContext";
 import { useUser } from '../Auth/UserContext';
+import axios from "axios";
 
 const Board = () => {
   const postPerPage = 5; // 페이지당 게시글 수
@@ -33,6 +34,8 @@ const Board = () => {
   const [newReply, setNewReply] = useState(0); // 새로운 댓글 내용
   const { projectId } = useProjectId(); // 선택된 프로젝트 ID
   const { userName } = useUser(); // 현재 사용자 이메일
+  const { user } = useUser();
+
 
   // 날짜 변환 함수
   const formatDateToKrTime = (date) => {
@@ -51,9 +54,11 @@ const Board = () => {
   useEffect(() => {
     const getPosts = async () => {
       try {
-        const response = await AuthAPI.get("/post/list");
+        const response = await AuthAPI.get(
+          "/post/list"
+          , {headers: { Authorization: `Bearer ${user.token}` }}
+        );
         setPosts(response.data);
-
         setPosts((prevPosts) =>
           prevPosts.map((post) => ({
             ...post,
@@ -64,7 +69,6 @@ const Board = () => {
         console.error("게시글 목록을 가져오는 중 오류 발생: ", error);
       }
     };
-
     getPosts();
   }, []);
 
@@ -101,9 +105,12 @@ const Board = () => {
   // 수정 저장
   const handleSaveEdit = async () => {
     try {
-      const response = await AuthAPI.patch(
-        `/post/update/${selectedPost.postId}?title=${encodeURIComponent(editedPost.title)}&content=${encodeURIComponent(editedPost.content)}`
-      );
+      console.log(user.token);
+      // const response = await AuthAPI.patch(
+      const response = await axios.patch(
+        `http://localhost:8080/post/update/${selectedPost.postId}?title=${encodeURIComponent(editedPost.title)}&content=${encodeURIComponent(editedPost.content)}`
+      , null, { headers: { Authorization: `Bearer ${user.token}` }}
+    );
       editedPost.date = formatDateToKrTime(editedPost.createdDate);
       setPosts((prevPosts) =>
         prevPosts.map((p) => (p.postId === editedPost.postId ? editedPost : p))
@@ -120,12 +127,16 @@ const Board = () => {
   const handleDelete = async (post, reply) => {
     setSelectedPost(post);
     if (reply) {
-      const replyURL = `/reply/delete/${reply.replyId}`;
-      await AuthAPI.delete(replyURL);
+      const replyURL = `http://localhost:8080/reply/delete/${reply.replyId}`;
+      await axios.delete(replyURL, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
     }
-    const boardURL = `/post/delete/${post.postId}`;
     try {
-      await AuthAPI.get(boardURL);
+      const boardURL = `http://localhost:8080/post/delete/${post.postId}`;
+      await axios.delete(boardURL, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
       setPosts((prevPosts) =>
         prevPosts.filter((post) => post.postId !== selectedPost.postId)
       );
@@ -150,9 +161,10 @@ const Board = () => {
     console.log("댓글 추가 데이터:", newReplyData);
     try {
       const response = await AuthAPI.post(
-        `/reply/create/${selectedPost.postId}`,
-        newReplyData
-      );
+        `http://localhost:8080/reply/create/${selectedPost.postId}`,
+        newReplyData, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
       const newReply = response.data;
       setReplies((prevReplies) => [...prevReplies, newReply]);
       await getReply();
@@ -168,7 +180,12 @@ const Board = () => {
   // 댓글 목록 불러오기 함수
   const getReply = async () => {
     try {
-      const response = await AuthAPI.get("/reply/list");
+      const response = await AuthAPI.get("http://localhost:8080/reply/list",
+      {
+        headers: {
+        Authorization: `Bearer ${user.token}`
+      }
+      });
       setReplies(response.data);
     } catch (error) {
       console.error("댓글 목록을 가져오는 중 오류 발생: ", error);
@@ -183,7 +200,9 @@ const Board = () => {
   const handleDeleteReply = async (reply) => {
     const URL = `/reply/delete/${reply.replyId}`;
     try {
-      const response = await AuthAPI.delete(URL);
+      const response = await AuthAPI.delete(URL, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
       setReplies((prevReplies) =>
         prevReplies.filter(
           (existingReply) => existingReply.replyId !== reply.replyId
@@ -204,11 +223,14 @@ const Board = () => {
     console.log("POST로 보내질 데이터: ", newPostData);
     try {
       const response = await AuthAPI.post(
-        "/post/create",
-        newPostData
-      );
+        "http://localhost:8080/post/create",
+        newPostData, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
       // 새로 데이터 가져오기 (새로 생성된 게시글이 반영이 안 돼서 그냥 다시 불러옴)
-      const getResponse = await AuthAPI.get("/post/list");
+      const getResponse = await AuthAPI.get("http://localhost:8080/post/list", {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
       setPosts(getResponse.data);
 
       setPosts((prevPosts) =>
