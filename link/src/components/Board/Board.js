@@ -70,13 +70,12 @@ const Board = () => {
         }));
 
         setPosts(formattedPosts); // 필터링된 게시글 설정
-        console.log("게시글 목록: ", formattedPosts);
       } catch (error) {
         console.error("게시글 목록을 가져오는 중 오류 발생: ", error);
       }
     };
     getPosts();
-  }, [projectId, posts]); // projectId가 변경될 때도 useEffect 재실행
+  }, [projectId, newPost]); // projectId가 변경될 때도 useEffect 재실행
 
 
   // 전체 페이지 수 계산
@@ -227,6 +226,7 @@ const Board = () => {
   const handleCreatePost = async () => {
     const newPostData = {
       ...newPost,
+      authorId: user.userId,
       projectId: projectId,
     };
     console.log("POST로 보내질 데이터: ", newPostData);
@@ -288,7 +288,7 @@ const Board = () => {
                 style={{ cursor: "pointer" }}
               >
                 <TableCell align="center">{post.title}</TableCell>
-                <TableCell align="center">{user.userName}</TableCell>
+                <TableCell align="center">{post.authorId}</TableCell>
                 <TableCell align="center">{post.date}</TableCell>
               </TableRow>
             ))}
@@ -332,7 +332,7 @@ const Board = () => {
               }
             />
           ) : (
-            <PostDetail post={selectedPost} user={user} />
+            <PostDetail post={selectedPost} user={selectedPost} />
           )}
           <DialogActions>
             {isEditing ? (

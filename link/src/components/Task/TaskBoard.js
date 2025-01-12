@@ -33,7 +33,6 @@ const TaskBoard = () => {
   const [openCreateDialog, setOpenCreateDialog] = useState(false); // 글 작성 다이얼로그 열림 여부
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
-    assignedUser: "",
     title: "",
     content: "",
     taskPriority: "HIGH",
@@ -120,6 +119,7 @@ const TaskBoard = () => {
           }
         ); // userId를 불러오지 못하여 1로 설정 
         setTasks(response.data);
+        console.log("작업 목록:", response.data);
         setTasks((prevTasks) =>
           prevTasks.map((task) => ({
             ...task,
@@ -151,6 +151,7 @@ const TaskBoard = () => {
   // 작업 클릭 시 다이얼로그 열기
   const handleTaskClick = (task) => {
     setSelectedTask(task);
+    console.log("선택된 작업:", selectedTask);
     setEditedTask(task);
     setOpenDialog(true);
   };
@@ -224,6 +225,7 @@ const TaskBoard = () => {
   const handleCreateTask = async () => {
     const newTaskData = {
       ...newTask,
+      assignedUserName: user.userName,
       projectId: projectId.projectId,
     };
     console.log("확인용 user 데이터: ", user);
@@ -285,7 +287,7 @@ const TaskBoard = () => {
               >
                 <TableCell align="center">{task.status}</TableCell>
                 <TableCell align="center">{task.title}</TableCell>
-                <TableCell align="center">{task.assignedUser}</TableCell>
+                <TableCell align="center">{task.assignedUserName}</TableCell>
                 <TableCell align="center">{task.taskPriority}</TableCell>
                 <TableCell align="right">{task.startDate}</TableCell>
                 <TableCell align="center">~</TableCell>
@@ -402,7 +404,7 @@ const TaskBoard = () => {
               style={{ marginBottom: "20px", marginTop: "20px" }}
             />
           ) : (
-            <TaskDetail task={selectedTask} />
+            <TaskDetail task={selectedTask} user={selectedTask} />
           )}
           <DialogActions>
             {isEditing ? (
