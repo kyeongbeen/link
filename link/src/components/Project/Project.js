@@ -15,6 +15,7 @@ import TextField from "@mui/material/TextField";
 import { DialogContent } from "@mui/material";
 import dayjs from "dayjs";
 import AuthAPI from "../Auth/AuthAPI";
+import { useProjectId } from "../Auth/ProjectIdContext";
 
 const Project = () => {
   const projectsPerPage = 5;
@@ -31,10 +32,18 @@ const Project = () => {
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [participantsDialog, setParticipantsDialog] = useState(false);
   const [projectParticipants, setProjectParticipants] = useState([]);
+  const { updateProjectId } = useProjectId(); // 선택한 프로젝트 아이디 추출을 위한 커스텀 훅
 
   // 날짜 형식 변환
   const formatDateToKrTime = (date) => {
     return dayjs(date).format("YYYY-MM-DD");
+  };
+
+  // 프로젝트 선택
+  const handleProjectSelect = (id) => {
+    updateProjectId(id); // 프로젝트 ID 업데이트
+    console.log('선택된 프로젝트 ID:', id);
+    alert(`프로젝트${id}이 선택되었습니다.`);
   };
 
   // 페이지네이션
@@ -67,6 +76,7 @@ const Project = () => {
       setProjects([...projects, response.data]);
     } catch (error) {
       console.error("프로젝트 생성 실패:", error.response || error.message);
+      alert("프로젝트 생성에 실패했습니다.");
     }
   };
 
@@ -149,7 +159,7 @@ const Project = () => {
       setInviteEmail("");
     } catch (error) {
       console.error("초대 전송 실패:", error);
-      alert("초대 전송 실패했습니다.");
+      alert("연결고리에 가입된 사용자가 아닙니다.");
     }
   };
 
@@ -260,8 +270,16 @@ const Project = () => {
                     variant="outlined"
                     color="secondary"
                     onClick={() => handleInvite(project.projectId)}
+                    style={{ marginRight: "10px" }}
                   >
                     팀원 추가
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => handleProjectSelect(project.projectId)}
+                  >
+                    이용하기
                   </Button>
                 </TableCell>
               </TableRow>

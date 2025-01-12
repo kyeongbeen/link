@@ -5,8 +5,8 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import listPlugin from '@fullcalendar/list'
 import { Dialog, DialogActions, Button} from "@mui/material";
 import TimelineTaskDetail from "./TimelineTaskDetail";
-import axios from 'axios';
 import AuthAPI from "../Auth/AuthAPI";
+import { useProjectId } from "../Auth/ProjectIdContext";
 
 const Timeline = () => {
     const calendarRef = useRef(null);
@@ -14,11 +14,11 @@ const Timeline = () => {
     const [selectedTask, setSelectedTask] = useState(null); // 선택된 작업
     const [isEditing, setIsEditing] = useState(false); // 수정중인지?
     const [taskList, setTaskList] = useState([]);
-    
+    const { projectId } = useProjectId();
 
     // APi 호출
     const getTaskList = ( projectId ) => {
-      const URL = "http://localhost:8080/task/lists?projectId=" + projectId;
+      const URL = "/task/lists?projectId=" + projectId;
       const response = fetch(URL);
       let tasks = response.json();
       return tasks;
@@ -89,11 +89,12 @@ const Timeline = () => {
     }
 
 const getTasks = async (projectId) => {
+  console.log(projectId);
   const token =
     "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6IjFAbGluay5jb20iLCJyb2xlIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzM2NDg2NTkwLCJleHAiOjE3MzY0OTAxOTB9.2qSuCPFeykEWzoa_-GTUXOi5aK6RINDrsx3_hoxpaug";
   try {
     const response = await AuthAPI.get(
-      `http://localhost:8080/task/lists?projectId=${projectId}`,
+      `/task/lists?projectId=${projectId}`,
       {
         headers: { Authorization: token },
       }
@@ -160,7 +161,7 @@ useEffect(() => {
     },
   });
 
-  fetchAndSetTasks(calendar, 1); // 데이터 요청 및 이벤트 추가
+  fetchAndSetTasks(calendar, projectId); // 데이터 요청 및 이벤트 추가
   calendar.render();
 }, []);
 

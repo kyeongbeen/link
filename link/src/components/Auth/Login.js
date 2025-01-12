@@ -46,7 +46,7 @@ const Login = () => {
         // const decodedUser = jwtDecode(response.data.token);
         // localStorage.setItem("user", JSON.stringify(decodedUser));
         
-        alert("연결고리에 오신 걸 환영합니다.");
+        alert("연결고리에 오신 것을 환영합니다.");
         return user;
       } else {
         throw new Error("token이 응답에 포함되어 있지 않습니다.");
