@@ -5,38 +5,59 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
+import DashboardBarChart from './DashboardBarChart';
 
-
-
-// 페이지 콘텐츠 컴포넌트 (컨텐츠 내용물)
-function Dashboard() {
-  const [taskData, setTaskData] = useState({
+const Dashboard = () => {
+  // 상태 정의
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  // 페이지 콘텐츠 컴포넌트 (컨텐츠 내용물)
+  const [taskData, setTaskData] = useState ({
     totalTasks: 0,
     completedTasks: 0,
     inProgressTasks: 0,
     inCompletedTasks: 0,
   });
 
+ 
+
+  // API 호출
   useEffect(() => {
-    // 랜덤 작업 배열 생성 (예: 25개의 작업)
-    const tasks = Array.from({ length: 25 }, () => {
-      const randomIndex = Math.floor(Math.random() * 3);
-      return ["FINISH", "ONGOING", "INCOMPLETE"][randomIndex];
-    });
+    const getDashboard = async () => {
+      try {
+        // API로부터 데이터 가져오기
+        const response = await axios.get(`http://localhost:8080/dashboard/status?projectId=${1}`);
+        
+        
+        // 작업 상태별 개수 계산
+        const finishedTasks = response.data.finishedTasks;
+        const delayedTasks = response.data.delayedTasks;
+        const ongoingTasks = response.data.ongoingTasks;
+        const inCompletedTasks = response.data.incompleteTasks;
 
-    // 작업 상태별 개수 계산
-    const completedTasks = tasks.filter((task) => task === "FINISH").length;
-    const inProgressTasks = tasks.filter((task) => task === "ONGOING").length;
-    const notCompletedTasks = tasks.filter((task) => task === "INCOMPLETE").length;
+        // 상태 업데이트
+        setTaskData({
+          totalTasks: response.data.totalTasks,
+          finishedTasks,
+          delayedTasks,
+          ongoingTasks,
+          inCompletedTasks,
+        });
+      } catch (error) {
+        console.error("Error fetching task data:", error);
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // 상태 업데이트
-    setTaskData({
-      totalTasks: tasks.length,
-      completedTasks,
-      inProgressTasks,
-      notCompletedTasks,
-    });
-  }, []); // 컴포넌트가 처음 렌더링될 때 한 번 실행
+    getDashboard();
+  }, []);
+
+   // 로딩 상태 표시
+   if (loading) return <div>Loading...</div>;
+   if (error) return <div>Error loading data</div>;
 
   
   return (
@@ -47,21 +68,19 @@ function Dashboard() {
         pt: 3, // 위쪽 여백 추가 (좌우 여백과 동일하게 설정)
       }}
     >
-
       <Grid2
         container
         spacing={2} // 카드 간 간격
         sx={{
           width: "100%", // Grid 컨테이너가 부모 요소를 채움
           justifyContent: "space-between", // 카드 간 간격을 균등하게
-
         }}
       >
         {[
           { title: "TOTAL", count: taskData.totalTasks, color: "primary" },
-          { title: "FINISH", count: taskData.completedTasks, color: "success.main" },
-          { title: "ONGOING", count: taskData.inProgressTasks, color: "warning.main" },
-          { title: "INCOMPLETE", count: taskData.notCompletedTasks, color: "error.main" },
+          { title: "FINISH", count: taskData.finishedTasks, color: "success.main" },
+          { title: "ONGOING", count: taskData.ongoingTasks, color: "warning.main" },
+          { title: "INCOMPLETE", count: taskData.inCompletedTasks, color: "error.main" },
         ].map((task, index) => (
           <Grid2 
             item
@@ -91,8 +110,24 @@ function Dashboard() {
           </Grid2>
         ))}
       </Grid2>
+
+      {/* 막대 차트 섹션 */}
+      <Box
+        sx={{
+          mt: 4, // 상단과 차트 섹션 간 간격
+          p: 2,
+          backgroundColor: "#fff", // 차트 배경색
+          borderRadius: 2,
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+          height: 400, // 차트 높이
+        }}
+      >
+        <DashboardBarChart data={taskData} />
+      </Box>
     </Box>
   );
+
+
 }
 
 export default Dashboard;
