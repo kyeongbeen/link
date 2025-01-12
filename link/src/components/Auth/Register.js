@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   Button,
   CssBaseline,
   TextField,
   FormControl,
-  FormControlLabel,
-  Checkbox,
   Grid,
   Box,
   Typography,
@@ -14,19 +13,49 @@ import {
 } from "@mui/material/";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
-const Register = () => {
+// 회원가입 컴포넌트
+export const Register = () => {
   const navigate = useNavigate();
   const theme = createTheme();
-  const [checked, setChecked] = useState(false);
+  const [signData, setSignData] = useState({
+    email: "",
+    password: "",
+    userName: "",
+  });
 
-  // 동의 체크
-  const handleAgree = (event) => {
-    setChecked(event.target.checked);
+  // 회원가입 요청
+  const signUp = async ({ email, userName, password }) => {
+    const data = { email, userName, password };
+    try {
+      const response = await axios.post("http://localhost:8080/signup", data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("회원가입 진행중 오류:", error);
+      throw error;
+    }
   };
 
-  // form 전송 (미구현)
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // 입력값 변경 시
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSignData({ ...signData, [name]: value });
+  };
+
+  // 폼 전송
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // 페이지 리로딩 방지
+    try {
+      await signUp(signData);
+      alert("회원가입이 완료되었습니다.");
+      navigate("/");
+    } catch (error) {
+      alert("회원가입에 실패했습니다.");
+      console.error("오류: ", error);
+    }
   };
 
   // 로그인 페이지로 이동
@@ -86,6 +115,8 @@ const Register = () => {
                       id="email"
                       name="email"
                       label="이메일 주소"
+                      value={signData.email}
+                      onChange={handleChange}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -96,6 +127,8 @@ const Register = () => {
                       id="password"
                       name="password"
                       label="비밀번호"
+                      value={signData.password}
+                      onChange={handleChange}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -112,17 +145,11 @@ const Register = () => {
                     <TextField
                       required
                       fullWidth
-                      id="name"
-                      name="name"
+                      id="userName"
+                      name="userName"
                       label="이름"
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox onChange={handleAgree} color="primary" />
-                      }
-                      label="회원가입 약관에 동의합니다."
+                      value={signData.userName}
+                      onChange={handleChange}
                     />
                   </Grid>
                 </Grid>
@@ -134,7 +161,6 @@ const Register = () => {
                     mt: 3,
                     mb: 2,
                     fontWeight: "bold",
-
                     backgroundColor: "lightgray",
                     "&:hover": { backgroundColor: "gray" },
                   }}

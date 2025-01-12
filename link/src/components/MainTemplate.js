@@ -24,11 +24,16 @@ import {
   SignOutButton,
 } from "@toolpad/core/Account";
 import { useNavigate } from "react-router-dom";
+import { useUser } from './Auth/UserContext';
+
 // 컴포넌트 가져오기
 import Board from "./Board/Board";
 import TaskBoard from "./Task/TaskBoard";
 import Dashboard from "./Dashboard/Dashboard";
-import Timeline from "./Timeline/Timeline"
+import Timeline from "./Timeline/Timeline";
+import Project from "./Project/Project";
+import { logout } from "./Auth/AuthAPI";
+import { jwtDecode } from "jwt-decode"; // jwt-decode 라이브러리 추가
 
 // 내비게이션 메뉴 설정
 const NAVIGATION = [
@@ -44,7 +49,8 @@ const demoTheme = createTheme({
   breakpoints: {
     values: { xs: 0, sm: 600, md: 600, lg: 1200, xl: 1536 },
   },
-});
+}
+);
 
 // 페이지 콘텐츠 컴포넌트 (컨텐츠 내용물)
 function DemoPageContent({ pathname }) {
@@ -66,7 +72,7 @@ function DemoPageContent({ pathname }) {
       {pathname === "/board" && <Board />}
       {pathname === "/taskboard" && <TaskBoard />}
       {pathname === "/timeline" && <Timeline />}
-      {pathname === "/project" && <Typography>Project</Typography>}
+      {pathname === "/project" && <Project />}
     </Box>
   );
 }
@@ -98,17 +104,9 @@ AccountSidebarPreview.propTypes = {
 const accounts = [
   {
     id: 1,
-    name: "연결고리",
-    email: "link@gmail.com",
-    image: "https://avatars.githubusercontent.com/u/19550456",
+    name: useUser,
+    image: "https://avatars.githubusercontent.com/u/187992632?v=4",
     projects: [{ id: 3, title: "Project X" }],
-  },
-  {
-    id: 2,
-    name: "Bharat MUI",
-    email: "bharat@mui.com",
-    color: "#8B4513",
-    projects: [{ id: 4, title: "Project A" }],
   },
 ];
 
@@ -137,7 +135,7 @@ function SidebarFooterAccountPopover() {
                 src={account.image ?? ""}
                 alt={account.name ?? ""}
               >
-                {account.name[0]}
+                {useUser}
               </Avatar>
             </ListItemIcon>
             <ListItemText
@@ -157,7 +155,8 @@ function SidebarFooterAccountPopover() {
       </MenuList>
       <Divider />
       <AccountPopoverFooter>
-        <SignOutButton />
+        {/* 로그아웃 버튼 */}
+        <SignOutButton onClick={logout} />
       </AccountPopoverFooter>
     </Stack>
   );
@@ -199,9 +198,8 @@ SidebarFooterAccount.propTypes = { mini: PropTypes.bool.isRequired };
 // 세션 데이터 설정 (임시)
 const demoSession = {
   user: {
-    name: "연결고리",
-    email: "link@gmail.com",
-    image: "https://avatars.githubusercontent.com/u/19550456",
+    name: useUser,
+    image: "https://avatars.githubusercontent.com/u/187992632?v=4",
   },
 };
 
@@ -255,7 +253,7 @@ function CustomizedTabs({ setPathname, pathname }) {
     }
   };
 
-  // segment가 "project"일 때 탭 UI 숨기기
+  // segment가 project일 때 탭 UI 숨기기
   if (pathname.includes("project")) {
     return null;
   }
@@ -295,7 +293,7 @@ function DashboardLayoutAccountSidebar(props) {
         setSession(demoSession);
       },
       signOut: () => {
-        navigate("/"); // 로그아웃 시 홈으로 이동
+        logout();
       },
     }),
     []

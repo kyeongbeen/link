@@ -11,21 +11,86 @@ import {
   Container,
 } from "@mui/material/";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import axios from "axios";
+import {jwtDecode} from "jwt-decode"; // jwt-decode 라이브러리 추가
 
 const Login = () => {
   const theme = createTheme();
-  const [checked, setChecked] = useState(false);
   const navigate = useNavigate();
+  const [loginData, setLoginData] = useState({
+    email: "",
+    password: "",
+  });
+  const [token, setToken] = useState(localStorage.getItem("token"));
 
-  // 동의 체크
-  const handleAgree = (event) => {
-    setChecked(event.target.checked);
+  // 로그인 요청
+  const login = async ({ email, password }) => {
+    try {
+      // 폼 데이터 형식으로 변환
+      const formData = new FormData();
+      formData.append("username", email);
+      formData.append("password", password);
+
+      const response = await axios.post(
+        "http://localhost:8080/login",
+        formData,
+        {withCredentials: true},
+      );
+      const user = response.data;
+      const userId = response.data;
+      if (response.data && response.data.token) {
+        setToken(response.data.token);
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userId", userId);
+        // // JWT 디코딩 후 사용자 정보 저장
+        // const decodedUser = jwtDecode(response.data.token);
+        // localStorage.setItem("user", JSON.stringify(decodedUser));
+        
+        alert("연결고리에 오신 걸 환영합니다.");
+        return user;
+      } else {
+        throw new Error("token이 응답에 포함되어 있지 않습니다.");
+      }
+    } catch (error) {
+      alert("아이디 또는 비밀번호가 잘못 되었습니다.");
+      console.error("로그인 실패:", error.response || error.message);
+      throw error;
+    }
   };
-  // 로그인 성공 시 대시보드 페이지로 이동 (로그인 로직 미구현)
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    navigate("/main");
+
+  // JWT 디코딩을 통해 사용자 정보 가져오기
+  const getUserFromToken = () => {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) return null;
+
+    try {
+      return jwtDecode(storedToken); // JWT 디코딩 후 반환
+    } catch (error) {
+      console.error("JWT 디코딩 실패:", error);
+      return null;
+    }
   };
+
+  const userInfo = getUserFromToken();
+  console.log("토큰에서 가져온 사용자 정보:", userInfo);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setLoginData({ ...loginData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // 기본 이벤트 방지
+    try {
+      const response = await login(loginData);
+      localStorage.setItem("tokenType", response.tokenType);
+      localStorage.setItem("token", response.token); // token을 로컬 스토리지에 저장
+      navigate("/main");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // 회원가입 페이지 이동
   const handleRegister = () => {
     navigate("/register");
@@ -83,6 +148,8 @@ const Login = () => {
                       id="email"
                       name="email"
                       label="이메일 주소"
+                      value={loginData.email}
+                      onChange={handleChange}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -93,6 +160,8 @@ const Login = () => {
                       id="password"
                       name="password"
                       label="비밀번호"
+                      value={loginData.password}
+                      onChange={handleChange}
                     />
                   </Grid>
                 </Grid>

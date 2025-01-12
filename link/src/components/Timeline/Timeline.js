@@ -6,6 +6,7 @@ import listPlugin from '@fullcalendar/list'
 import { Dialog, DialogActions, Button} from "@mui/material";
 import TimelineTaskDetail from "./TimelineTaskDetail";
 import axios from 'axios';
+import AuthAPI from "../Auth/AuthAPI";
 
 const Timeline = () => {
     const calendarRef = useRef(null);
@@ -91,7 +92,7 @@ const getTasks = async (projectId) => {
   const token =
     "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6IjFAbGluay5jb20iLCJyb2xlIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzM2NDg2NTkwLCJleHAiOjE3MzY0OTAxOTB9.2qSuCPFeykEWzoa_-GTUXOi5aK6RINDrsx3_hoxpaug";
   try {
-    const response = await axios.get(
+    const response = await AuthAPI.get(
       `http://localhost:8080/task/lists?projectId=${projectId}`,
       {
         headers: { Authorization: token },
