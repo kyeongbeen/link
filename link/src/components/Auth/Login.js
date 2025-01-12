@@ -46,12 +46,13 @@ const Login = () => {
         // const decodedUser = jwtDecode(response.data.token);
         // localStorage.setItem("user", JSON.stringify(decodedUser));
         
-        alert("로그인에 성공했습니다.");
+        alert("연결고리에 오신 걸 환영합니다.");
         return user;
       } else {
         throw new Error("token이 응답에 포함되어 있지 않습니다.");
       }
     } catch (error) {
+      alert("아이디 또는 비밀번호가 잘못 되었습니다.");
       console.error("로그인 실패:", error.response || error.message);
       throw error;
     }

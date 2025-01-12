@@ -109,7 +109,7 @@ const TaskBoard = () => {
   useEffect(() => {
     const getTasks = async () => {
       try {
-        const response = await AuthAPI.get(`/task/lists?projectId=${1}`); // 테스트를 위해 1로 설정
+        const response = await AuthAPI.get(`/task/lists?projectId=${1}`); // userId를 불러오지 못하여 1로 설정 
         setTasks(response.data);
         console.log("API 응답 데이터:", response.data);
         setTasks((prevTasks) =>
@@ -212,7 +212,7 @@ const TaskBoard = () => {
   const handleCreateTask = async () => {
     const newTaskData = {
       ...newTask,
-      projectId: 1, // 실제 프로젝트 ID로 변경 (추후 수정, 지금은 테스트)
+      projectId: 1, // projectId를 가져 오려면 userId가 필요해서 이것 역시 1로 설정 
     };
     console.log("확인용 user 데이터: ", user);
     try {
@@ -228,7 +228,7 @@ const TaskBoard = () => {
 
       setTasks((prevTasks) => [response.data, ...prevTasks]);
       setOpenCreateDialog(false);
-      alert("새 작업이 성공적으로 생성되었습니다.");
+      alert("새 작업이 생성되었습니다.");
     } catch (error) {
       console.error("오류 :", error);
       if (error.response) {

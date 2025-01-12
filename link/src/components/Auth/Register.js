@@ -34,7 +34,7 @@ export const Register = () => {
       });
       return response.data;
     } catch (error) {
-      console.error("Error during sign up:", error);
+      console.error("회원가입 진행중 오류:", error);
       throw error;
     }
   };
@@ -51,16 +51,16 @@ export const Register = () => {
     try {
       await signUp(signData);
       alert("회원가입이 완료되었습니다.");
-      navigate("/"); 
+      navigate("/");
     } catch (error) {
-      
-      console.error("Sign up failed", error);
+      alert("회원가입에 실패했습니다.");
+      console.error("오류: ", error);
     }
   };
 
   // 로그인 페이지로 이동
   const handleLogin = () => {
-    navigate("/"); 
+    navigate("/");
   };
 
   return (

@@ -29,24 +29,30 @@ const Project = () => {
   const [inviteDialog, setInviteDialog] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [participantsDialog, setParticipantsDialog] = useState(false);
+  const [projectParticipants, setProjectParticipants] = useState([]);
 
+  // 날짜 형식 변환
   const formatDateToKrTime = (date) => {
     return dayjs(date).format("YYYY-MM-DD");
   };
 
+  // 페이지네이션
   const totalPage = Math.ceil(projects.length / projectsPerPage);
   const currentProjects = projects.slice(
     (currentPage - 1) * projectsPerPage,
     currentPage * projectsPerPage
   );
 
+  // 페이지 변경
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
+  // 프로젝트 추가하기
   const handleCreateProject = async () => {
     const newProjectData = {
-      projectLeaderId: 28,
+      projectLeaderId: 1, // 임의로 값을 줘야 함, userId를 못 받아 옴
       projectName: newProject.projectName,
     };
     try {
@@ -57,12 +63,23 @@ const Project = () => {
       });
       response.data.createDate = formatDateToKrTime(response.data.createDate);
       alert("프로젝트가 생성되었습니다.");
+      setOpenDialog(false);
       setProjects([...projects, response.data]);
     } catch (error) {
       console.error("프로젝트 생성 실패:", error.response || error.message);
     }
   };
 
+  // userId 받아오기 (실패)
+  // useEffect(() => {
+  //   if (projectId) {
+  //     const participant = getProjectParticipants(projectId);
+  //     setUser(participant);
+  //     console.log("생성한 유저ID:", participant?.userId); // 테스트용
+  //   }
+  // }, [projectId]);
+
+  // 프로젝트 삭제하기 (프로젝트 ID가 외래키로 잡혀 있어서 삭제가 안됨)
   const handleDelete = async (project) => {
     const URL = `/project/lists/${project.projectId}`;
     try {
@@ -72,11 +89,12 @@ const Project = () => {
       );
       alert("프로젝트가 성공적으로 삭제되었습니다.");
     } catch (error) {
-      alert("프로젝트 삭제 실패했습니다.");
+      alert("프로젝트 삭제에 실패했습니다.");
       console.error("프로젝트 삭제 중 오류 발생:", error);
     }
   };
 
+  // 프로젝트 수정하기 (아무 에러도 안 뜨고 수정이 안 됨)
   const handleEdit = (project) => {
     setEditedProject(project);
     setIsEditing(true);
@@ -85,14 +103,19 @@ const Project = () => {
 
   const handleSaveEdit = async () => {
     try {
-      await AuthAPI.patch(`/project/lists`, editedProject, {
-        headers: { "Content-Type": "application/json" },
+      await AuthAPI.patch("/project/lists", editedProject, {
+        headers: { 
+          "Content-Type": "application/json" 
+        },
       });
+      editedProject.createDate = formatDateToKrTime(editedProject.createDate);
+
       setProjects((prevProjects) =>
         prevProjects.map((p) =>
-          p.projectId === editedProject.projectId ? editedProject : p
+          (p.projectId === editedProject.projectId ? editedProject : p)
         )
       );
+      console.log(editedProject); // 확인용
       alert("프로젝트가 수정되었습니다.");
       setIsEditing(false);
       setOpenDialog(false);
@@ -101,22 +124,24 @@ const Project = () => {
     }
   };
 
+  // 초대 다이얼로그 열기
   const handleInvite = (projectId) => {
     setSelectedProjectId(projectId);
     setInviteDialog(true);
   };
 
+  // 초대 전송
   const handleSendInvite = async () => {
     const inviteData = {
       email: inviteEmail,
       projectId: selectedProjectId,
     };
-    console.log(inviteData);  // 테스트용
+    console.log(inviteData); // 테스트용
     try {
       await AuthAPI.post("project/participants/new", inviteData, {
         headers: {
           "Content-Type": "application/json",
-           Authorization: `Bearer ${localStorage.getItem("token")}`, // 인증 토큰
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // 인증 토큰
         },
       });
       alert("초대가 성공적으로 전송되었습니다.");
@@ -128,27 +153,57 @@ const Project = () => {
     }
   };
 
+  // 프로젝트 추가 다이얼로그 닫기
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setIsEditing(false);
   };
 
+  // 초대 다이얼로그 닫기
   const handleCloseInviteDialog = () => {
     setInviteDialog(false);
     setInviteEmail("");
   };
 
+  // 프로젝트 목록 가져오기
   useEffect(() => {
     const getProjects = async () => {
       try {
-        const response = await AuthAPI.get(`/project/lists?userId=${28}`);
+        const response = await AuthAPI.get(`/project/lists?userId=${1}`);
         setProjects(response.data);
       } catch (error) {
-        console.error("작업 목록을 가져오는 중 오류 발생:", error);
+        console.error("프로젝트 목록을 가져오는 중 오류 발생:", error);
       }
     };
     getProjects();
   }, []);
+
+  // 프로젝트에 소속된 유저 리스트 가져오기
+  const getProjectParticipants = async (projectId) => {
+    try {
+      const response = await AuthAPI.get(`/user/lists?projectId=${projectId}`);
+      // console.log(response.data);  // 테스트용
+      return response.data;
+    } catch (error) {
+      console.error("프로젝트 참여자 목록을 가져오는 중 오류 발생:", error);
+    }
+  };
+
+  // 참여자 목록 열기
+  const handleOpenParticipantsDialog = async (projectId) => {
+    try {
+      const participants = await getProjectParticipants(projectId);
+      setProjectParticipants(participants);
+      setParticipantsDialog(true);
+    } catch (error) {
+      console.error("참여자 목록 열기 실패:", error);
+    }
+  };
+
+  // 참여자 목록 닫기
+  const handleCloseParticipantsDialog = () => {
+    setParticipantsDialog(false);
+  };
 
   return (
     <div style={{ padding: "20px" }}>
@@ -160,13 +215,11 @@ const Project = () => {
       >
         추가하기
       </Button>
-
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 850 }}>
           <TableHead>
             <TableRow>
               <TableCell align="center">프로젝트</TableCell>
-              <TableCell align="center">리더</TableCell>
               <TableCell align="center">생성일</TableCell>
               <TableCell align="center">작업</TableCell>
             </TableRow>
@@ -174,8 +227,15 @@ const Project = () => {
           <TableBody>
             {currentProjects.map((project) => (
               <TableRow key={project.projectId}>
-                <TableCell align="center">{project.projectName}</TableCell>
-                <TableCell align="center">{project.projectLeaderId}</TableCell>
+                <TableCell
+                  align="center"
+                  onClick={() =>
+                    handleOpenParticipantsDialog(project.projectId)
+                  }
+                  style={{ cursor: "pointer", textDecoration: "underline" }}
+                >
+                  {project.projectName}
+                </TableCell>
                 <TableCell align="center">
                   {formatDateToKrTime(project.createDate)}
                 </TableCell>
@@ -222,12 +282,16 @@ const Project = () => {
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>{isEditing ? "프로젝트 수정" : "프로젝트 추가"}</DialogTitle>
+        <DialogTitle>
+          {isEditing ? "프로젝트 수정" : "프로젝트 추가"}
+        </DialogTitle>
         <DialogContent>
           <TextField
             label="프로젝트 이름"
             fullWidth
-            value={isEditing ? editedProject?.projectName : newProject.projectName}
+            value={
+              isEditing ? editedProject?.projectName : newProject.projectName
+            }
             onChange={(e) =>
               isEditing
                 ? setEditedProject({
@@ -277,6 +341,35 @@ const Project = () => {
           </Button>
           <Button onClick={handleSendInvite} color="primary">
             초대하기
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={participantsDialog}
+        onClose={handleCloseParticipantsDialog}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>프로젝트 참여자</DialogTitle>
+        <DialogContent>
+          {Array.isArray(projectParticipants) &&
+          projectParticipants.length > 0 ? (
+            <ol>
+              {projectParticipants.map((participant) => (
+                <li key={participant.id}>
+                  {participant.name} ({participant.email})
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p>참여자가 없습니다.</p>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseParticipantsDialog} color="secondary">
+            닫기
           </Button>
         </DialogActions>
       </Dialog>
