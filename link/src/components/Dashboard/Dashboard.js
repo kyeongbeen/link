@@ -5,13 +5,16 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import DashboardBarChart from './DashboardBarChart';
+import AuthAPI from '../Auth/AuthAPI';
+import { useProjectId } from '../Auth/ProjectIdContext';
 
 const Dashboard = () => {
   // 상태 정의
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { projectId } = useProjectId();
+
   // 페이지 콘텐츠 컴포넌트 (컨텐츠 내용물)
   const [taskData, setTaskData] = useState ({
     totalTasks: 0,
@@ -28,6 +31,7 @@ const Dashboard = () => {
     "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6IjFAbGluay5jb20iLCJyb2xlIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzM2NjczMjgzLCJleHAiOjE3MzY3NTk2ODN9.TSeemNbA8yYU5CNRYVojBAg1giMA88BZuipvlcwtJdE";
     const getDashboard = async () => {
       try {
+        console.log(projectId);
         // API로부터 데이터 가져오기
         const response = await axios.get(`http://localhost:8080/dashboard/status?projectId=${1}`,
           {
@@ -63,7 +67,7 @@ const Dashboard = () => {
 
    // 로딩 상태 표시
    if (loading) return <div>Loading...</div>;
-   if (error) return <div>Error loading data</div>;
+   if (error) return <div>진행하실 프로젝트를 먼저 선택하여 주세요.</div>;
 
   
   return (

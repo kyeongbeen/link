@@ -24,6 +24,32 @@ const Login = () => {
   // UserContext 사용
   const { login } = useUser();
 
+
+//       const response = await axios.post(
+//         "http://localhost:8080/login",
+//         formData,
+//         {withCredentials: true},
+//       );
+//       const user = response.data;
+//       const userId = response.data;
+//       if (response.data && response.data.token) {
+//         setToken(response.data.token);
+//         localStorage.setItem("token", response.data.token);
+//         localStorage.setItem("userId", userId);
+//         // // JWT 디코딩 후 사용자 정보 저장
+//         // const decodedUser = jwtDecode(response.data.token);
+//         // localStorage.setItem("user", JSON.stringify(decodedUser));
+        
+//         alert("연결고리에 오신 것을 환영합니다.");
+//         return user;
+//       } else {
+//         throw new Error("token이 응답에 포함되어 있지 않습니다.");
+//       }
+//     } catch (error) {
+//       alert("아이디 또는 비밀번호가 잘못 되었습니다.");
+//       console.error("로그인 실패:", error.response || error.message);
+//       throw error;
+
   // 로그인 요청 및 response return
   const postLogin = async (loginData) => {
     const formData = new FormData();
@@ -37,6 +63,7 @@ const Login = () => {
       });
     if (!response.ok) {
       throw new Error("아이디 또는 비밀번호를 다시 입력해주세요!");
+
     }
 
     // 로그인 정보 return

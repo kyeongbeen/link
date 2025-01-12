@@ -16,9 +16,9 @@ import TextField from "@mui/material/TextField";
 import { DialogContent, DialogContentText } from "@mui/material";
 import dayjs from "dayjs";
 import AuthAPI from "../Auth/AuthAPI";
-import { useUser } from "../Auth/UserContext"
+import { useProjectId } from "../Auth/ProjectIdContext";
+import { useUser } from '../Auth/UserContext';
 import axios from "axios";
-
 
 const Board = () => {
   const postPerPage = 5; // 페이지당 게시글 수
@@ -32,7 +32,10 @@ const Board = () => {
   const [posts, setPosts] = useState([]); // 게시글 목록
   const [newPost, setNewPost] = useState(0); // 새로운 게시글 내용
   const [newReply, setNewReply] = useState(0); // 새로운 댓글 내용
+  const { projectId } = useProjectId(); // 선택된 프로젝트 ID
+  const { userName } = useUser(); // 현재 사용자 이메일
   const { user } = useUser();
+
 
   // 날짜 변환 함수
   const formatDateToKrTime = (date) => {
@@ -147,11 +150,12 @@ const Board = () => {
 
   // 댓글 추가
   const handleAddReply = async () => {
+    console.log("유저 이름", userName);
     const newReplyData = {
-      projectId: 0, // 임시
-      authorId: 0, // 임시
+      projectId: projectId, 
+      authorName: userName,
       content: newReply.content,
-      createdDate: newReply.createDate,
+      createdDate: new Date(),
       postId: selectedPost.postId,
     };
     console.log("댓글 추가 데이터:", newReplyData);
@@ -194,7 +198,7 @@ const Board = () => {
 
   // 댓글 삭제
   const handleDeleteReply = async (reply) => {
-    const URL = `http://localhost:8080/reply/delete/${reply.replyId}`;
+    const URL = `/reply/delete/${reply.replyId}`;
     try {
       const response = await AuthAPI.delete(URL, {
         headers: { Authorization: `Bearer ${user.token}` }
@@ -360,7 +364,7 @@ const Board = () => {
                   <p>
                     {" "}
                     {/* 현재 로그인 유저는 가져 올 수 없기 때문에 '미구현'으로 출력 */}
-                    <strong>미구현</strong> (
+                    <strong>{reply.authorName}</strong> (
                     {formatDateToKrTime(reply.createdDate)})
                   </p>
                   <p>{reply.content}</p>

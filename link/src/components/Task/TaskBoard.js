@@ -20,6 +20,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import AuthAPI from "../Auth/AuthAPI";
+import { useProjectId } from "../Auth/ProjectIdContext";
 import { useUser } from "../Auth/UserContext"
 
 const TaskBoard = () => {
@@ -43,7 +44,9 @@ const TaskBoard = () => {
   }); // 새 작업 데이터, Default 값 설정
   // const { user, setUser } = useState({});
   const TOKEN = localStorage.getItem("token");
+  const projectId = useProjectId();
   const { user } = useUser();
+
   // // 유저 정보 가져오기
   // useEffect(() => {
   //   if (TOKEN) {
@@ -110,7 +113,8 @@ const TaskBoard = () => {
   useEffect(() => {
     const getTasks = async () => {
       try {
-        const response = await AuthAPI.get(`/task/lists?projectId=${user.userId}`,
+        console.log("프로젝트 아이디:", projectId); 
+        const response = await AuthAPI.get(`/task/lists?projectId=${projectId.projectId}`,
           {
             headers:{Authorization: `Bearer ${user.token}`}
           }
@@ -220,7 +224,7 @@ const TaskBoard = () => {
   const handleCreateTask = async () => {
     const newTaskData = {
       ...newTask,
-      projectId: 1, // projectId를 가져 오려면 userId가 필요해서 이것 역시 1로 설정 
+      projectId: projectId.projectId,
     };
     console.log("확인용 user 데이터: ", user);
     try {
