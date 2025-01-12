@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Register from './components/Auth/Register';
 import Login from './components/Auth/Login';
-import Dashboard from './components/Dashboard/Dashboard';
 import Main from './components/MainTemplate';
 const App = () => {
   return (
