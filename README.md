@@ -14,12 +14,7 @@
 
 프로젝트 의존성 파일을 기반으로 필요한 라이브러리들을 설치할 수 있습니다. 아래의 명령어로 의존성들을 설치하세요:
 
-DatePicker 사용을 위해 install 해야 합니다.
-```
-  npm install @mui/x-date-pickers
-  npm install dayjs
-```
-위 패키지 설치 한번씩 부탁드려요.
+**시작하기**
 
 ```bash
 npm install
@@ -40,16 +35,25 @@ npm install
                 ├─AuthAPI.js
                 ├─Login.js
                 ├─Register.js
+                ├─ProjectIdContext.js
+                └─UserContext.js
             └─Dashboard
-                └─Dashboard.js
+                ├─Dashboard.js
+                └─DashboardBarChart.js
+            └─Project
+                ├─Pagination.js
+                └─Project.js
             └─Board
-                └─Board.js
-                └─Pagination.js
+                ├─Board.js
+                ├─Pagination.js
                 └─PostDetail.js
             └─Task
-               └─TaskBoard.js
-               └─TaskDetail.js
+               ├─TaskBoard.js
+               ├─TaskDetail.js
                └─TaskPagenation.js
+            └─Timeline
+               ├─Timeline.js
+               └─TimelineTaskDetail.js
             └─MainTemplate.js
         └─...
 ```
@@ -71,7 +75,6 @@ npm install
    - 더미 데이터로 테스트까지만 진행
    - API 관련 로직 구현
    - MUI(Material-UI)를 사용
-   - **댓글 작성, 수정, 게시글 수정, 삭제 오류로 구현x (계속 작업할 예정)**
 
 4. **작업 페이지 구현**
    - 작업 상세보기, 페이지네이션, 작업 추가 및 삭제
@@ -83,17 +86,14 @@ npm install
    - MainTemplate.js에서 메인 레이아웃을 구현
    - Dashboard.js는 대쉬보드 컴포넌트로 수정
    - API 관련 로직 구현
+   - MUI(Material-UI)를 사용
     
 6. **프로젝트 구현**
-   - 프로젝트 생성 구현
+   - 프로젝트 생성, 수정, 삭제, 팀원 리스트 보기 구현
    - 프로젝트 팀원 초대 구현
    - API 관련 로직 구현
+   - MUI(Material-UI)를 사용
   
-
-## **남은 작업**
-
-1. 프로젝트 삭제
-2. 프로젝트 이름 수정
 
 
 
