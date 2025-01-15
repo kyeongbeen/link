@@ -1,5 +1,5 @@
 # 연결고리
-
+Repo Addr : https://github.com/kyeongbeen/link.git
 # Github Repo
 - link_back, link_front 디렉토리에 각각 백엔드, 프론트엔드에서 구현한 내용이 존재
 - 기존 link_front, link_front로 나누어 진행하던 프로젝트 Repo를 합쳐 하나의 Repo로 관리
